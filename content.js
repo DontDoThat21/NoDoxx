@@ -121,8 +121,8 @@ class NoDoxxingRedactor {
       // Replace text node with redacted span
       textNode.parentElement.replaceChild(redactedSpan, textNode);
     } else {
-      // Mark as processed even if no redactions to avoid re-processing
-      textNode.parentElement.dataset.nodoxxingProcessed = 'true';
+      // Do not mark parent element as processed if no redactions occur
+      // This ensures dynamic content added later can still be scanned.
     }
   }
 
