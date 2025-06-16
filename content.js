@@ -34,13 +34,17 @@ class NoDoxxingRedactor {
       'personal', 'private', 'confidential', 'sensitive'
     ];
     
+    // Initialize user-defined strings array
+    this.userStrings = [];
+    
     this.init();
   }
 
   init() {
-    // Check if extension is enabled
-    chrome.storage.sync.get(['nodoxxingEnabled'], (result) => {
+    // Check if extension is enabled and load user strings
+    chrome.storage.sync.get(['nodoxxingEnabled', 'userStrings'], (result) => {
       this.isEnabled = result.nodoxxingEnabled !== false; // Default to enabled
+      this.userStrings = result.userStrings || []; // Default to empty array
       if (this.isEnabled) {
         this.startRedaction();
       }
@@ -54,6 +58,16 @@ class NoDoxxingRedactor {
           this.startRedaction();
         } else {
           this.restoreOriginalContent();
+        }
+      }
+      
+      // Update user strings when they change
+      if (changes.userStrings) {
+        this.userStrings = changes.userStrings.newValue || [];
+        // Re-process content if extension is enabled
+        if (this.isEnabled) {
+          this.restoreOriginalContent();
+          this.startRedaction();
         }
       }
     });
@@ -90,6 +104,16 @@ class NoDoxxingRedactor {
         content = content.replace(pattern, (match) => {
           return `REDACTED`;
         });
+      }
+    }
+
+    // Apply user-defined string redactions
+    if (this.userStrings && this.userStrings.length > 0) {
+      for (const userPattern of this.userPatterns) {
+        if (userPattern.test(content)) {
+          hasRedactions = true;
+          content = content.replace(userPattern, 'REDACTED');
+        }
       }
     }
 

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Strings Test Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .test-section h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .dynamic-content {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f5f5f5;
+        }
+    </style>
+</head>
+<body>
+    <h1>User-Defined Strings Test Page</h1>
+    <p>This page contains test content with strings that users might want to redact.</p>
+    
+    <div class="test-section">
+        <h3>Company Information</h3>
+        <p>My company is Acme Corporation and we're located in Springfield.</p>
+        <p>We work with SecretProject and ConfidentialData daily.</p>
+        <p>Our project codename is BlueWhale and the client is MegaCorp.</p>
+    </div>
+    
+    <div class="test-section">
+        <h3>Personal Information</h3>
+        <p>My name is Alice Johnson and I work at TechStart Inc.</p>
+        <p>My colleague Bob Smith handles the ProjectAlpha initiative.</p>
+        <p>The server password is MySecretPassword123!</p>
+    </div>
+    
+    <div class="test-section">
+        <h3>Mixed Content</h3>
+        <p>Contact alice.johnson@example.com for ProjectBeta details.</p>
+        <p>The ClientName prefers to use SecureChannel for communication.</p>
+        <p>UserName: testuser, CompanyCode: ABC123, InternalRef: XYZ789</p>
+    </div>
+    
+    <div class="test-section">
+        <h3>Case Sensitivity Test</h3>
+        <p>Testing case sensitivity: MyCompany, mycompany, MYCOMPANY, MyCompany</p>
+        <p>Special characters: Test@Company, Test-Company, Test_Company</p>
+    </div>
+    
+    <div class="dynamic-content">
+        <h3>Dynamic Content Test</h3>
+        <button onclick="addMoreContent()">Add Dynamic Content</button>
+        <div id="dynamic-area"></div>
+    </div>
+    
+    <script>
+        function addMoreContent() {
+            const dynamicArea = document.getElementById('dynamic-area');
+            const newContent = document.createElement('p');
+            newContent.innerHTML = 'Dynamically added: ProjectGamma status update - contact DynamicUser at dynamic@example.com';
+            dynamicArea.appendChild(newContent);
+        }
+        
+        // Simulate delayed content loading
+        setTimeout(() => {
+            const dynamicArea = document.getElementById('dynamic-area');
+            const delayedContent = document.createElement('p');
+            delayedContent.innerHTML = 'Delayed content: DelayedProject involves CustomString and should be redacted automatically.';
+            dynamicArea.appendChild(delayedContent);
+        }, 3000);
+    </script>
+</body>
+</html>
