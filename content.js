@@ -109,15 +109,10 @@ class NoDoxxingRedactor {
 
     // Apply user-defined string redactions
     if (this.userStrings && this.userStrings.length > 0) {
-      for (const userString of this.userStrings) {
-        if (userString && userString.trim()) {
-          // Escape special regex characters and create case-insensitive pattern
-          const escapedString = userString.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-          const userPattern = new RegExp(escapedString, 'gi');
-          if (userPattern.test(content)) {
-            hasRedactions = true;
-            content = content.replace(userPattern, 'REDACTED');
-          }
+      for (const userPattern of this.userPatterns) {
+        if (userPattern.test(content)) {
+          hasRedactions = true;
+          content = content.replace(userPattern, 'REDACTED');
         }
       }
     }
