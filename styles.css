@@ -1,26 +1,26 @@
 /* NoDoxxing Extension Styles */
 
-.nodoxxing-redacted {
-  background-color: #000000 !important;
-  color: #ffffff !important;
-  padding: 2px 4px !important;
-  border-radius: 2px !important;
-  font-family: 'Courier New', monospace !important;
-  font-weight: bold !important;
-  font-size: inherit !important;
-  text-decoration: none !important;
-  border: 1px solid #333 !important;
-  display: inline !important;
-  letter-spacing: 0.5px !important;
+.nodoxxing-container .nodoxxing-redacted {
+  background-color: #000000;
+  color: #ffffff;
+  padding: 2px 4px;
+  border-radius: 2px;
+  font-family: 'Courier New', monospace;
+  font-weight: bold;
+  font-size: inherit;
+  text-decoration: none;
+  border: 1px solid #333;
+  display: inline;
+  letter-spacing: 0.5px;
 }
 
-.nodoxxing-redacted:hover {
-  background-color: #222222 !important;
-  cursor: default !important;
+.nodoxxing-container .nodoxxing-redacted:hover {
+  background-color: #222222;
+  cursor: default;
 }
 
 /* Ensure redacted text doesn't break layout */
-.nodoxxing-redacted * {
-  background-color: inherit !important;
-  color: inherit !important;
+.nodoxxing-container .nodoxxing-redacted * {
+  background-color: inherit;
+  color: inherit;
 }
