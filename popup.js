@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
   addStringBtn.addEventListener('click', addUserString);
   
   // Handle enter key in input
-  newStringInput.addEventListener('keypress', (e) => {
+  newStringInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
       addUserString();
     }
