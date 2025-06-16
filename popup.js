@@ -104,22 +104,33 @@ document.addEventListener('DOMContentLoaded', () => {
     
     if (userStrings.length === 0) {
       const emptyItem = document.createElement('li');
-      emptyItem.innerHTML = '<span class="string-text" style="font-style: italic; color: #888;">No custom strings added</span>';
+      const emptyText = document.createElement('span');
+      emptyText.className = 'string-text';
+      emptyText.style.fontStyle = 'italic';
+      emptyText.style.color = '#888';
+      emptyText.textContent = 'No custom strings added';
+      emptyItem.appendChild(emptyText);
       userStringsList.appendChild(emptyItem);
       return;
     }
     
     userStrings.forEach(userString => {
       const listItem = document.createElement('li');
-      listItem.innerHTML = `
-        <span class="string-text" title="${userString}">${userString}</span>
-        <button class="remove-btn" data-string="${userString}">Remove</button>
-      `;
       
-      const removeBtn = listItem.querySelector('.remove-btn');
+      const stringText = document.createElement('span');
+      stringText.className = 'string-text';
+      stringText.title = userString;
+      stringText.textContent = userString;
+      listItem.appendChild(stringText);
+      
+      const removeBtn = document.createElement('button');
+      removeBtn.className = 'remove-btn';
+      removeBtn.dataset.string = userString;
+      removeBtn.textContent = 'Remove';
       removeBtn.addEventListener('click', () => {
         removeUserString(userString);
       });
+      listItem.appendChild(removeBtn);
       
       userStringsList.appendChild(listItem);
     });
