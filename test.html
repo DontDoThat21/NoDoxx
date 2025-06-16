@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NoDoxxing Extension Test Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .test-section h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .dynamic-content {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f5f5f5;
+        }
+    </style>
+</head>
+<body>
+    <h1>NoDoxxing Extension Test Page</h1>
+    <p>This page contains various types of sensitive data that should be automatically redacted by the NoDoxxing extension.</p>
+    
+    <div class="test-section">
+        <h3>Email Addresses</h3>
+        <p>Contact me at john.doe@example.com or support@company.org for assistance.</p>
+        <p>My personal email is jane_smith123@gmail.com</p>
+    </div>
+    
+    <div class="test-section">
+        <h3>Phone Numbers</h3>
+        <p>Call me at (555) 123-4567 or 555.987.6543</p>
+        <p>International: +1-555-123-4567</p>
+        <p>Simple format: 5551234567</p>
+    </div>
+    
+    <div class="test-section">
+        <h3>Personal Names</h3>
+        <p>John Smith works with Jane Doe on this project.</p>
+        <p>Contact Michael Johnson or Sarah Williams for more information.</p>
+    </div>
+    
+    <div class="test-section">
+        <h3>GitHub Information</h3>
+        <p>Check out my GitHub profile at github.com/johndoe123</p>
+        <p>Follow @jane_coder on GitHub for updates.</p>
+    </div>
+    
+    <div class="test-section">
+        <h3>Addresses</h3>
+        <p>I live at 123 Main Street, Springfield.</p>
+        <p>The office is located at 456 Oak Avenue, Suite 200.</p>
+    </div>
+    
+    <div class="test-section">
+        <h3>Credit Card Numbers</h3>
+        <p>Card number: 4532 1234 5678 9012</p>
+        <p>Another card: 5555-4444-3333-2222</p>
+    </div>
+    
+    <div class="test-section">
+        <h3>SSN</h3>
+        <p>Social Security Number: 123-45-6789</p>
+    </div>
+    
+    <div class="test-section">
+        <h3>IP Addresses</h3>
+        <p>Server IP: 192.168.1.100</p>
+        <p>External IP: 203.0.113.45</p>
+    </div>
+    
+    <div class="dynamic-content">
+        <h3>Dynamic Content Test</h3>
+        <button onclick="addSensitiveData()">Add More Sensitive Data</button>
+        <div id="dynamic-area"></div>
+    </div>
+    
+    <script>
+        function addSensitiveData() {
+            const dynamicArea = document.getElementById('dynamic-area');
+            const newContent = document.createElement('p');
+            newContent.innerHTML = 'Dynamically added: Contact alice.wonderland@example.com at (555) 987-1234. GitHub: github.com/alice_codes';
+            dynamicArea.appendChild(newContent);
+        }
+        
+        // Simulate dynamic content loading
+        setTimeout(() => {
+            const dynamicArea = document.getElementById('dynamic-area');
+            const delayedContent = document.createElement('p');
+            delayedContent.innerHTML = 'Delayed content: Bob Wilson, email: bob.wilson@test.com, phone: 555-111-2222';
+            dynamicArea.appendChild(delayedContent);
+        }, 3000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,159 @@
+/* NoDoxxing Popup Styles */
+
+body {
+  width: 320px;
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  color: #ffffff;
+}
+
+.popup-container {
+  padding: 20px;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #444;
+  padding-bottom: 15px;
+}
+
+.header h1 {
+  margin: 0 0 5px 0;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.header p {
+  margin: 0;
+  color: #aaa;
+  font-size: 12px;
+}
+
+.controls {
+  margin-bottom: 20px;
+}
+
+.toggle-container {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 24px;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #666;
+  transition: .4s;
+  border-radius: 24px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #4CAF50;
+}
+
+input:checked + .slider:before {
+  transform: translateX(26px);
+}
+
+.toggle-label {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  background: rgba(76, 175, 80, 0.2);
+  border: 1px solid #4CAF50;
+  border-radius: 8px;
+}
+
+.status.inactive {
+  background: rgba(244, 67, 54, 0.2);
+  border-color: #f44336;
+}
+
+.status-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #4CAF50;
+}
+
+.status-indicator.inactive {
+  background-color: #f44336;
+}
+
+.status span {
+  font-size: 14px;
+}
+
+.info {
+  margin-bottom: 20px;
+}
+
+.info h3 {
+  margin: 0 0 10px 0;
+  font-size: 14px;
+  color: #ddd;
+}
+
+.info ul {
+  margin: 0;
+  padding-left: 20px;
+  list-style: none;
+}
+
+.info li {
+  margin-bottom: 5px;
+  font-size: 12px;
+  color: #ccc;
+}
+
+.footer {
+  text-align: center;
+  border-top: 1px solid #444;
+  padding-top: 15px;
+}
+
+.footer p {
+  margin: 0;
+  font-size: 12px;
+  color: #888;
+  font-style: italic;
+}
