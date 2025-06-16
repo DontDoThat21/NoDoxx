@@ -8,6 +8,7 @@ This browser extension automatically detects and redacts sensitive data on web p
 
 - **Automatic Detection**: Identifies and redacts sensitive data in real-time
 - **Multiple Data Types**: Protects emails, phone numbers, names, addresses, and more
+- **Custom Strings**: Add your own custom strings to redact (company names, project names, etc.)
 - **CIA/FBI Style**: Replaces sensitive data with "REDACTED" text with black background and white text
 - **Dynamic Content**: Works with dynamically loaded content and AJAX updates
 - **Easy Toggle**: Simple on/off control via browser extension popup
@@ -23,6 +24,7 @@ This browser extension automatically detects and redacts sensitive data on web p
 - 👤 GitHub usernames
 - 👥 Personal names (First Last format)
 - 🏠 Street addresses
+- 🔤 Custom strings (user-defined)
 
 ## Installation
 
@@ -38,12 +40,27 @@ This browser extension automatically detects and redacts sensitive data on web p
 
 1. **Automatic Protection**: Once installed, the extension automatically starts protecting your data on all websites
 2. **Toggle Protection**: Click the extension icon in your browser toolbar to enable/disable protection
-3. **Visual Feedback**: Protected data appears as "REDACTED" with black background and white text
-4. **Status Check**: Open the extension popup to see current protection status
+3. **Add Custom Strings**: Open the extension popup and add your own strings to redact (company names, project codes, etc.)
+4. **Visual Feedback**: Protected data appears as "REDACTED" with black background and white text
+5. **Status Check**: Open the extension popup to see current protection status
+
+### Managing Custom Strings
+
+1. Click the NoDoxxing extension icon in your browser toolbar
+2. In the popup, find the "Custom Strings to Redact" section
+3. Type the string you want to redact in the input field
+4. Click "Add" or press Enter
+5. The string will be added to your list and immediately start being redacted on all pages
+6. To remove a string, click the "Remove" button next to it in the list
+7. All custom strings are saved and will persist across browser sessions
+
+**Note**: Custom string matching is case-insensitive, so adding "MyCompany" will also redact "mycompany" and "MYCOMPANY".
 
 ## Testing
 
-Open the included `test.html` file in your browser to see the extension in action. The page contains various types of sensitive data that will be automatically redacted.
+Open the included `test.html` file in your browser to see the extension in action with built-in patterns. The page contains various types of sensitive data that will be automatically redacted.
+
+For testing custom strings, open `test-user-strings.html` which contains sample content specifically designed to test user-defined string redaction.
 
 ## How It Works
 
