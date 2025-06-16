@@ -8,10 +8,10 @@ class NoDoxxingRedactor {
       email: /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g,
       
       // Phone numbers (various formats)
-      phone: /(\+?1[-.\\s]?)?\(?([0-9]{3})\)?[-.\\s]?([0-9]{3})[-.\\s]?([0-9]{4})\b/g,
+      phone: /(\+?1[-.\s]?)?\(?([0-9]{3})\)?[-.\s]?([0-9]{3})[-.\s]?([0-9]{4})\b/g,
       
       // Credit card numbers (basic pattern)
-      creditCard: /\b(?:\d{4}[-\\s]?){3}\d{4}\b/g,
+      creditCard: /\b(?:\d{4}[-\s]?){3}\d{4}\b/g,
       
       // SSN (XXX-XX-XXXX format)
       ssn: /\b\d{3}-\d{2}-\d{4}\b/g,
@@ -22,11 +22,11 @@ class NoDoxxingRedactor {
       // GitHub usernames (when preceded by @ or github.com/)
       github: /(github\.com\/|@)([a-zA-Z0-9]([a-zA-Z0-9\-]){0,38})/g,
       
-      // Common name patterns (when in specific contexts)
-      names: /\b[A-Z][a-z]+ [A-Z][a-z]+\b/g,
+      // Addresses (basic street address pattern) - put before names to avoid conflict
+      address: /\b\d+\s+[A-Za-z0-9\s]+\s+(Street|St|Avenue|Ave|Road|Rd|Lane|Ln|Drive|Dr|Court|Ct|Boulevard|Blvd)\b/gi,
       
-      // Addresses (basic street address pattern)
-      address: /\b\d+\s+[A-Za-z0-9\s]+\s+(Street|St|Avenue|Ave|Road|Rd|Lane|Ln|Drive|Dr|Court|Ct|Boulevard|Blvd)\b/gi
+      // Common name patterns (when in specific contexts)
+      names: /\b[A-Z][a-z]+ [A-Z][a-z]+\b/g
     };
     
     this.sensitiveKeywords = [
