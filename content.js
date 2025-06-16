@@ -72,6 +72,13 @@ class NoDoxxingRedactor {
   }
 
   processTextNode(textNode) {
+    // Skip if already processed or if parent is redacted
+    if (!textNode || !textNode.parentElement || 
+        textNode.parentElement.classList.contains('nodoxxing-redacted') ||
+        textNode.parentElement.dataset.nodoxxingProcessed) {
+      return;
+    }
+
     let content = textNode.textContent;
     let hasRedactions = false;
     let originalContent = content;
@@ -102,6 +109,9 @@ class NoDoxxingRedactor {
         textNode.parentElement.dataset.originalContent = originalContent;
       }
       
+      // Mark as processed
+      textNode.parentElement.dataset.nodoxxingProcessed = 'true';
+      
       // Create redacted span element
       const redactedSpan = document.createElement('span');
       redactedSpan.className = 'nodoxxing-redacted';
@@ -110,6 +120,9 @@ class NoDoxxingRedactor {
       
       // Replace text node with redacted span
       textNode.parentElement.replaceChild(redactedSpan, textNode);
+    } else {
+      // Mark as processed even if no redactions to avoid re-processing
+      textNode.parentElement.dataset.nodoxxingProcessed = 'true';
     }
   }
 
@@ -165,7 +178,8 @@ class NoDoxxingRedactor {
           }
           
           // Skip already processed nodes
-          if (parent.classList.contains('nodoxxing-redacted')) {
+          if (parent.classList.contains('nodoxxing-redacted') || 
+              parent.dataset.nodoxxingProcessed) {
             return NodeFilter.FILTER_REJECT;
           }
           
@@ -186,17 +200,22 @@ class NoDoxxingRedactor {
   }
 
   restoreOriginalContent() {
-    // Find all elements that have original content stored
-    const elementsWithOriginalContent = document.querySelectorAll('[data-original-content]');
+    // Find all elements that have original content stored or are marked as processed
+    const elementsWithOriginalContent = document.querySelectorAll('[data-original-content], [data-nodoxxing-processed]');
     
     elementsWithOriginalContent.forEach(element => {
       // Find redacted spans within this element
       const redactedSpans = element.querySelectorAll('.nodoxxing-redacted');
       
-      if (redactedSpans.length > 0) {
+      if (redactedSpans.length > 0 && element.dataset.originalContent) {
         // Restore original text content
         element.textContent = element.dataset.originalContent;
         delete element.dataset.originalContent;
+      }
+      
+      // Remove processing marker
+      if (element.dataset.nodoxxingProcessed) {
+        delete element.dataset.nodoxxingProcessed;
       }
     });
     
@@ -207,6 +226,9 @@ class NoDoxxingRedactor {
       if (parent && parent.dataset.originalContent) {
         parent.textContent = parent.dataset.originalContent;
         delete parent.dataset.originalContent;
+        if (parent.dataset.nodoxxingProcessed) {
+          delete parent.dataset.nodoxxingProcessed;
+        }
       }
     });
   }
@@ -215,8 +237,14 @@ class NoDoxxingRedactor {
 // Initialize the redactor when the page loads
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => {
-    new NoDoxxingRedactor();
+    // Small delay to ensure DOM is fully ready
+    setTimeout(() => {
+      new NoDoxxingRedactor();
+    }, 100);
   });
 } else {
-  new NoDoxxingRedactor();
+  // DOM already loaded, but add small delay for dynamic content
+  setTimeout(() => {
+    new NoDoxxingRedactor();
+  }, 100);
 }
