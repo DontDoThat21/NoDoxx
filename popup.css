@@ -157,3 +157,107 @@ input:checked + .slider:before {
   color: #888;
   font-style: italic;
 }
+
+.user-strings-section {
+  margin-bottom: 20px;
+  border-top: 1px solid #444;
+  padding-top: 15px;
+}
+
+.user-strings-section h3 {
+  margin: 0 0 15px 0;
+  font-size: 14px;
+  color: #ddd;
+}
+
+.input-container {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 15px;
+}
+
+.input-container input {
+  flex: 1;
+  padding: 8px 12px;
+  background: #333;
+  border: 1px solid #555;
+  border-radius: 4px;
+  color: #fff;
+  font-size: 14px;
+}
+
+.input-container input::placeholder {
+  color: #999;
+}
+
+.input-container input:focus {
+  outline: none;
+  border-color: #4CAF50;
+}
+
+.input-container button {
+  padding: 8px 16px;
+  background: #4CAF50;
+  border: none;
+  border-radius: 4px;
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.input-container button:hover {
+  background: #45a049;
+}
+
+.input-container button:disabled {
+  background: #666;
+  cursor: not-allowed;
+}
+
+.user-strings-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 120px;
+  overflow-y: auto;
+}
+
+.user-strings-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: #333;
+  border: 1px solid #555;
+  border-radius: 4px;
+  margin-bottom: 5px;
+  font-size: 12px;
+  color: #ccc;
+}
+
+.user-strings-list li:last-child {
+  margin-bottom: 0;
+}
+
+.user-strings-list .string-text {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.user-strings-list .remove-btn {
+  background: #f44336;
+  border: none;
+  border-radius: 3px;
+  color: white;
+  padding: 4px 8px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.user-strings-list .remove-btn:hover {
+  background: #d32f2f;
+}
