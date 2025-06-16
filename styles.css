@@ -1,0 +1,26 @@
+/* NoDoxxing Extension Styles */
+
+.nodoxxing-container .nodoxxing-redacted {
+  background-color: #000000;
+  color: #ffffff;
+  padding: 2px 4px;
+  border-radius: 2px;
+  font-family: 'Courier New', monospace;
+  font-weight: bold;
+  font-size: inherit;
+  text-decoration: none;
+  border: 1px solid #333;
+  display: inline;
+  letter-spacing: 0.5px;
+}
+
+.nodoxxing-container .nodoxxing-redacted:hover {
+  background-color: #222222;
+  cursor: default;
+}
+
+/* Ensure redacted text doesn't break layout */
+.nodoxxing-container .nodoxxing-redacted * {
+  background-color: inherit;
+  color: inherit;
+}
