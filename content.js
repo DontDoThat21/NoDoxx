@@ -165,6 +165,12 @@ class NoDoxxingRedactor {
     this.mutationObserver = observer;
   }
 
+  disconnectMutationObserver() {
+    if (this.mutationObserver) {
+      this.mutationObserver.disconnect();
+      this.mutationObserver = null;
+    }
+  }
   processElementTextNodes(element) {
     const walker = document.createTreeWalker(
       element,
