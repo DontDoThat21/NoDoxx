@@ -36,6 +36,7 @@ class NoDoxxingRedactor {
     
     // Initialize user-defined strings array
     this.userStrings = [];
+    this.userPatterns = [];
     
     this.init();
   }
@@ -45,6 +46,7 @@ class NoDoxxingRedactor {
     chrome.storage.sync.get(['nodoxxingEnabled', 'userStrings'], (result) => {
       this.isEnabled = result.nodoxxingEnabled !== false; // Default to enabled
       this.userStrings = result.userStrings || []; // Default to empty array
+      this.updateUserPatterns();
       if (this.isEnabled) {
         this.startRedaction();
       }
@@ -64,12 +66,23 @@ class NoDoxxingRedactor {
       // Update user strings when they change
       if (changes.userStrings) {
         this.userStrings = changes.userStrings.newValue || [];
+        this.updateUserPatterns();
         // Re-process content if extension is enabled
         if (this.isEnabled) {
           this.restoreOriginalContent();
           this.startRedaction();
         }
       }
+    });
+  }
+
+  updateUserPatterns() {
+    // Convert user strings to case-insensitive regex patterns
+    this.userPatterns = this.userStrings.map(userString => {
+      // Escape special regex characters in user string
+      const escapedString = userString.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      // Use word boundaries for better matching - but be careful with special chars
+      return new RegExp(`\\b${escapedString}\\b`, 'gi');
     });
   }
 
@@ -108,7 +121,7 @@ class NoDoxxingRedactor {
     }
 
     // Apply user-defined string redactions
-    if (this.userStrings && this.userStrings.length > 0) {
+    if (this.userPatterns.length > 0) {
       for (const userPattern of this.userPatterns) {
         if (userPattern.test(content)) {
           hasRedactions = true;
