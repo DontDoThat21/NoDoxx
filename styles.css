@@ -1,8 +1,22 @@
 /* NoDoxxing Extension Styles */
 
 /* Hide page content initially to prevent leakage during processing */
+/* Primary hiding mechanism - injected via JavaScript for immediate effect */
+html:not(.nodoxxing-ready), body:not(.nodoxxing-ready) {
+  visibility: hidden !important;
+  opacity: 0 !important;
+}
+
+/* Secondary hiding mechanism for processing state */
 body.nodoxxing-processing {
   visibility: hidden !important;
+  opacity: 0 !important;
+}
+
+/* Ready state - allow content to be visible */
+html.nodoxxing-ready, html.nodoxxing-ready body {
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 
 .nodoxxing-redacted {
