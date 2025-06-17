@@ -121,7 +121,7 @@ class NoDoxxingRedactor {
     }
 
     // Apply user-defined string redactions
-    if (this.userStrings && this.userStrings.length > 0 && this.userPatterns) {
+    if (this.userPatterns.length > 0) {
       for (const userPattern of this.userPatterns) {
         if (userPattern.test(content)) {
           hasRedactions = true;
