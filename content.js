@@ -61,9 +61,7 @@ class NoDoxxingRedactor {
         this.isEnabled = changes.nodoxxingEnabled.newValue;
         if (this.isEnabled) {
           // Hide page again for re-processing
-          if (document.body) {
-            document.body.classList.add('nodoxxing-processing');
-          }
+          this.hidePage();
           this.startRedaction();
         } else {
           this.restoreOriginalContent();
@@ -78,9 +76,7 @@ class NoDoxxingRedactor {
         // Re-process content if extension is enabled
         if (this.isEnabled) {
           // Hide page again for re-processing
-          if (document.body) {
-            document.body.classList.add('nodoxxing-processing');
-          }
+          this.hidePage();
           this.restoreOriginalContent();
           this.startRedaction();
         }
@@ -116,16 +112,22 @@ class NoDoxxingRedactor {
   }
 
   hidePage() {
-    // Add the processing class to hide the page
+    // Remove ready class and add processing class to hide the page
+    if (document.documentElement) {
+      document.documentElement.classList.remove('nodoxxing-ready');
+    }
     if (document.body) {
       document.body.classList.add('nodoxxing-processing');
     }
   }
 
   revealPage() {
-    // Remove the processing class to show the page
+    // Remove the processing class and add ready class to show the page
     if (document.body) {
       document.body.classList.remove('nodoxxing-processing');
+    }
+    if (document.documentElement) {
+      document.documentElement.classList.add('nodoxxing-ready');
     }
   }
 
@@ -312,12 +314,46 @@ class NoDoxxingRedactor {
   }
 }
 
-// Hide page content immediately to prevent leakage
-if (document.body) {
-  document.body.classList.add('nodoxxing-processing');
+// Immediately inject CSS to hide page content and prevent any leakage
+function injectImmediateHidingCSS() {
+  const style = document.createElement('style');
+  style.textContent = `
+    html, body {
+      visibility: hidden !important;
+      opacity: 0 !important;
+    }
+    html.nodoxxing-ready, html.nodoxxing-ready body {
+      visibility: visible !important;
+      opacity: 1 !important;
+    }
+    body.nodoxxing-processing {
+      visibility: hidden !important;
+      opacity: 0 !important;
+    }
+  `;
+  
+  // Insert at the very beginning of head, or create head if it doesn't exist
+  if (document.head) {
+    document.head.insertBefore(style, document.head.firstChild);
+  } else {
+    // If head doesn't exist yet, create it
+    const head = document.createElement('head');
+    head.appendChild(style);
+    if (document.documentElement) {
+      document.documentElement.insertBefore(head, document.documentElement.firstChild);
+    } else {
+      // Last resort - wait for document element
+      document.addEventListener('DOMContentLoaded', () => {
+        document.head.insertBefore(style, document.head.firstChild);
+      });
+    }
+  }
 }
 
-// Initialize the redactor
+// Inject hiding CSS immediately
+injectImmediateHidingCSS();
+
+// Initialize the redactor when DOM is ready
 let redactor;
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => {
