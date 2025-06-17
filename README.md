@@ -1,4 +1,7 @@
-# NoDoxxing - Anti-Doxx Browser Extension
+# NoDoxxing - Anti-REDACTED Extension
+
+![image](https://REDACTED/assets/b52e5e9a-af8e-4728-b52b-90REDACTED)
+![image](https://REDACTED/assets/575dd9ea-74e8-44e5-bf12-84d665d58bdf)
 
 🔒 **Automatic privacy protection for screen sharing and browsing**
 
@@ -6,48 +9,48 @@ This browser extension automatically detects and redacts sensitive data on web p
 
 ## Features
 
-- **Automatic Detection**: Identifies and redacts sensitive data in real-time
-- **Multiple Data Types**: Protects emails, phone numbers, names, addresses, and more
-- **Custom Strings**: Add your own custom strings to redact (company names, project names, etc.)
+- **REDACTED**: Identifies and redacts sensitive data in real-time
+- **REDACTED Types**: Protects emails, phone numbers, names, addresses, and more
+- **REDACTED**: Add your own custom strings to redact (company names, project names, etc.)
 - **CIA/FBI Style**: Replaces sensitive data with "REDACTED" text with black background and white text
-- **Dynamic Content**: Works with dynamically loaded content and AJAX updates
-- **Easy Toggle**: Simple on/off control via browser extension popup
-- **Privacy First**: All processing happens locally in your browser
+- **REDACTED**: Works with dynamically loaded content and AJAX updates
+- **REDACTED**: Simple on/off control via browser extension popup
+- **REDACTED**: All processing happens locally in your browser
 
-## Protected Data Types
+## REDACTED Types
 
 - 📧 Email addresses
 - 📱 Phone numbers (various formats)
 - 💳 Credit card numbers
-- 🆔 Social Security numbers
+- 🆔 REDACTED numbers
 - 🌐 IP addresses
 - 👤 GitHub usernames
-- 👥 Personal names (First Last format)
+- 👥 Personal names (REDACTED format)
 - 🏠 Street addresses
 - 🔤 Custom strings (user-defined)
 
 ## Installation
 
-### Install from Source (Developer Mode)
+### Install from Source (REDACTED)
 
 1. Clone or download this repository
-2. Open Chrome/Edge and navigate to `chrome://extensions/`
+2. REDACTED/Edge and navigate to `chrome://extensions/`
 3. Enable "Developer mode" in the top right
 4. Click "Load unpacked" and select the extension folder
 5. The NoDoxxing extension should now appear in your browser toolbar
 
 ### Usage
 
-1. **Automatic Protection**: Once installed, the extension automatically starts protecting your data on all websites
-2. **Toggle Protection**: Click the extension icon in your browser toolbar to enable/disable protection
-3. **Add Custom Strings**: Open the extension popup and add your own strings to redact (company names, project codes, etc.)
-4. **Visual Feedback**: Protected data appears as "REDACTED" with black background and white text
-5. **Status Check**: Open the extension popup to see current protection status
+1. **REDACTED**: Once installed, the extension automatically starts protecting your data on all websites
+2. **REDACTED**: Click the extension icon in your browser toolbar to enable/disable protection
+3. **REDACTED Strings**: Open the extension popup and add your own strings to redact (company names, project codes, etc.)
+4. **REDACTED**: Protected data appears as "REDACTED" with black background and white text
+5. **REDACTED**: Open the extension popup to see current protection status
 
-### Managing Custom Strings
+### REDACTED Strings
 
 1. Click the NoDoxxing extension icon in your browser toolbar
-2. In the popup, find the "Custom Strings to Redact" section
+2. In the popup, find the "REDACTED to Redact" section
 3. Type the string you want to redact in the input field
 4. Click "Add" or press Enter
 5. The string will be added to your list and immediately start being redacted on all pages
@@ -58,28 +61,28 @@ This browser extension automatically detects and redacts sensitive data on web p
 
 ## Testing
 
-Open the included `test.html` file in your browser to see the extension in action with built-in patterns. The page contains various types of sensitive data that will be automatically redacted.
+Open the included `REDACTED.html` file in your browser to see the extension in action with built-in patterns. The page contains various types of sensitive data that will be automatically redacted.
 
-For testing custom strings, open `test-user-strings.html` which contains sample content specifically designed to test user-defined string redaction.
+For testing custom strings, open `REDACTED-user-strings.html` which contains sample content specifically designed to REDACTED user-defined string redaction.
 
-## How It Works
+## REDACTED Works
 
-1. **Content Script**: Scans all text content on web pages using TreeWalker API
-2. **Pattern Matching**: Uses regular expressions to identify sensitive data patterns
+1. **REDACTED**: Scans all text content on web pages using TreeWalker API
+2. **REDACTED**: Uses regular expressions to identify sensitive data patterns
 3. **DOM Replacement**: Replaces sensitive text with styled "REDACTED" elements
-4. **Dynamic Monitoring**: Uses MutationObserver to handle dynamically added content
-5. **Local Processing**: All detection and redaction happens locally for privacy
+4. **REDACTED**: Uses MutationObserver to handle dynamically added content
+5. **REDACTED**: All detection and redaction happens locally for privacy
 
 ## Privacy & Security
 
-- **No Data Collection**: The extension does not collect, store, or transmit any of your data
-- **Local Processing**: All redaction happens directly in your browser
-- **Open Source**: Full source code is available for review
-- **Minimal Permissions**: Only requires access to active tabs for content modification
+- **REDACTED Collection**: The extension does not collect, store, or transmit any of your data
+- **REDACTED**: All redaction happens directly in your browser
+- **REDACTED**: Full source code is available for review
+- **REDACTED**: Only requires access to active tabs for content modification
 
 ## Development
 
-### File Structure
+### REDACTED
 ```
 ├── manifest.json          # Extension configuration
 ├── content.js            # Main redaction logic
@@ -87,7 +90,7 @@ For testing custom strings, open `test-user-strings.html` which contains sample 
 ├── popup.html/css/js     # Extension popup interface
 ├── styles.css            # Redacted text styling
 ├── icons/                # Extension icons
-└── test.html            # Test page for development
+└── REDACTED.html            # REDACTED page for development
 ```
 
 ### Customization
@@ -99,7 +102,7 @@ You can modify the detection patterns in `content.js` by editing the `patterns` 
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
-4. Test thoroughly with the test page
+4. REDACTED thoroughly with the REDACTED page
 5. Submit a pull request
 
 ## License
