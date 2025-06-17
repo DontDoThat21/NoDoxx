@@ -38,6 +38,9 @@ class NoDoxxingRedactor {
     this.userStrings = [];
     this.userPatterns = [];
     
+    // Track processed text nodes to avoid reprocessing
+    this.processedTextNodes = new WeakSet();
+    
     this.init();
   }
 
@@ -137,7 +140,7 @@ class NoDoxxingRedactor {
     // Skip if already processed or if parent is redacted
     if (!textNode || !textNode.parentElement || 
         textNode.parentElement.classList.contains('nodoxxing-redacted') ||
-        textNode.parentElement.dataset.nodoxxingProcessed) {
+        this.processedTextNodes.has(textNode)) {
       return;
     }
 
@@ -181,8 +184,8 @@ class NoDoxxingRedactor {
         textNode.parentElement.dataset.originalContent = originalContent;
       }
       
-      // Mark as processed
-      textNode.parentElement.dataset.nodoxxingProcessed = 'true';
+      // Mark this text node as processed
+      this.processedTextNodes.add(textNode);
       
       // Create redacted span element
       const redactedSpan = document.createElement('span');
@@ -193,8 +196,8 @@ class NoDoxxingRedactor {
       // Replace text node with redacted span
       textNode.parentElement.replaceChild(redactedSpan, textNode);
     } else {
-      // Do not mark parent element as processed if no redactions occur
-      // This ensures dynamic content added later can still be scanned.
+      // Mark as processed even if no redactions to avoid reprocessing
+      this.processedTextNodes.add(textNode);
     }
   }
 
@@ -257,7 +260,7 @@ class NoDoxxingRedactor {
           
           // Skip already processed nodes
           if (parent.classList.contains('nodoxxing-redacted') || 
-              parent.dataset.nodoxxingProcessed) {
+              this.processedTextNodes.has(node)) {
             return NodeFilter.FILTER_REJECT;
           }
           
@@ -278,6 +281,9 @@ class NoDoxxingRedactor {
   }
 
   restoreOriginalContent() {
+    // Clear processed text nodes tracking
+    this.processedTextNodes = new WeakSet();
+    
     // Find all elements that have original content stored or are marked as processed
     const elementsWithOriginalContent = document.querySelectorAll('[data-original-content], [data-nodoxxing-processed]');
     
