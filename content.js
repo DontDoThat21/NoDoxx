@@ -3,6 +3,7 @@
 class NoDoxxingRedactor {
   constructor() {
     this.isEnabled = true;
+    this.contrastModeEnabled = true; // Default enabled as per requirement
     this.patterns = {
       // Email addresses
       email: /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g,
@@ -42,11 +43,12 @@ class NoDoxxingRedactor {
   }
 
   init() {
-    // Check if extension is enabled and load user strings
+    // Check if extension is enabled and load user strings and contrast mode setting
     try {
-      chrome.storage.sync.get(['nodoxxingEnabled', 'userStrings'], (result) => {
+      chrome.storage.sync.get(['nodoxxingEnabled', 'userStrings', 'contrastModeEnabled'], (result) => {
         try {
           this.isEnabled = result.nodoxxingEnabled !== false; // Default to enabled
+          this.contrastModeEnabled = result.contrastModeEnabled !== false; // Default to enabled
           this.userStrings = result.userStrings || []; // Default to empty array
           this.updateUserPatterns();
           if (this.isEnabled) {
@@ -89,6 +91,17 @@ class NoDoxxingRedactor {
           // Re-process content if extension is enabled
           if (this.isEnabled) {
             // Hide page again for re-processing
+            this.hidePage();
+            this.restoreOriginalContent();
+            this.startRedaction();
+          }
+        }
+        
+        // Update contrast mode when it changes
+        if (changes.contrastModeEnabled) {
+          this.contrastModeEnabled = changes.contrastModeEnabled.newValue;
+          // Re-process content if extension is enabled
+          if (this.isEnabled) {
             this.hidePage();
             this.restoreOriginalContent();
             this.startRedaction();
@@ -213,6 +226,24 @@ class NoDoxxingRedactor {
       redactedSpan.textContent = content;
       redactedSpan.title = 'Sensitive data redacted by NoDoxxing extension';
       
+      // Apply contrast-aware styling
+      const parentBgColor = this.getElementBackgroundColor(textNode.parentElement);
+      const contrastColors = this.getContrastColors(parentBgColor);
+      
+      // Apply the contrast colors directly to the element
+      redactedSpan.style.backgroundColor = contrastColors.backgroundColor;
+      redactedSpan.style.color = contrastColors.color;
+      redactedSpan.style.borderColor = contrastColors.borderColor;
+      
+      // Also set a custom hover color that's slightly different
+      const hoverColor = this.getHoverColor(contrastColors.backgroundColor);
+      redactedSpan.addEventListener('mouseenter', () => {
+        redactedSpan.style.backgroundColor = hoverColor;
+      });
+      redactedSpan.addEventListener('mouseleave', () => {
+        redactedSpan.style.backgroundColor = contrastColors.backgroundColor;
+      });
+      
       // Replace text node with redacted span
       textNode.parentElement.replaceChild(redactedSpan, textNode);
     } else {
@@ -232,6 +263,169 @@ class NoDoxxingRedactor {
     }
     
     return false;
+  }
+
+  // Color analysis functions for contrast mode
+  getElementBackgroundColor(element) {
+    // Walk up the DOM tree to find the effective background color
+    let currentElement = element;
+    let attempts = 0;
+    const maxAttempts = 10; // Prevent infinite loops
+    
+    while (currentElement && currentElement !== document.body && attempts < maxAttempts) {
+      try {
+        const computedStyle = window.getComputedStyle(currentElement);
+        const backgroundColor = computedStyle.backgroundColor;
+        
+        // If we find a non-transparent background color, use it
+        if (backgroundColor && backgroundColor !== 'rgba(0, 0, 0, 0)' && backgroundColor !== 'transparent') {
+          return backgroundColor;
+        }
+      } catch (error) {
+        // If getComputedStyle fails, continue to parent
+        console.debug('NoDoxxing: Failed to get computed style for element', error);
+      }
+      
+      currentElement = currentElement.parentElement;
+      attempts++;
+    }
+    
+    // Default to body background color or white
+    try {
+      const bodyStyle = window.getComputedStyle(document.body);
+      const bodyBg = bodyStyle.backgroundColor;
+      return (bodyBg && bodyBg !== 'rgba(0, 0, 0, 0)' && bodyBg !== 'transparent') ? bodyBg : 'rgb(255, 255, 255)';
+    } catch (error) {
+      // If all else fails, return white
+      console.debug('NoDoxxing: Failed to get body background color', error);
+      return 'rgb(255, 255, 255)';
+    }
+  }
+
+  parseRgbColor(colorString) {
+    // Parse various color formats to RGB values
+    if (!colorString || typeof colorString !== 'string') {
+      return [255, 255, 255]; // Default to white
+    }
+    
+    const color = colorString.trim();
+    
+    if (color.startsWith('rgb(')) {
+      const values = color.match(/\d+/g);
+      return values ? values.map(Number) : [255, 255, 255];
+    } else if (color.startsWith('rgba(')) {
+      const values = color.match(/[\d.]+/g);
+      return values ? values.slice(0, 3).map(Number) : [255, 255, 255];
+    } else if (color.startsWith('#')) {
+      const hex = color.slice(1);
+      if (hex.length === 3) {
+        return [
+          parseInt(hex[0] + hex[0], 16),
+          parseInt(hex[1] + hex[1], 16),
+          parseInt(hex[2] + hex[2], 16)
+        ];
+      } else if (hex.length === 6) {
+        return [
+          parseInt(hex.slice(0, 2), 16),
+          parseInt(hex.slice(2, 4), 16),
+          parseInt(hex.slice(4, 6), 16)
+        ];
+      }
+    } else if (color === 'transparent' || color === 'inherit') {
+      return [255, 255, 255]; // Default to white for transparent
+    }
+    
+    // Try to handle named colors (basic ones)
+    const namedColors = {
+      'white': [255, 255, 255],
+      'black': [0, 0, 0],
+      'red': [255, 0, 0],
+      'green': [0, 128, 0],
+      'blue': [0, 0, 255],
+      'yellow': [255, 255, 0],
+      'cyan': [0, 255, 255],
+      'magenta': [255, 0, 255],
+      'gray': [128, 128, 128],
+      'grey': [128, 128, 128]
+    };
+    
+    const lowerColor = color.toLowerCase();
+    if (namedColors[lowerColor]) {
+      return namedColors[lowerColor];
+    }
+    
+    // Default to white if parsing fails
+    return [255, 255, 255];
+  }
+
+  calculateLuminance(r, g, b) {
+    // Calculate relative luminance using sRGB color space
+    // Ensure values are within valid range
+    r = Math.max(0, Math.min(255, r || 0));
+    g = Math.max(0, Math.min(255, g || 0));
+    b = Math.max(0, Math.min(255, b || 0));
+    
+    const [rs, gs, bs] = [r, g, b].map(c => {
+      c = c / 255;
+      return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+    });
+    return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
+  }
+
+  getContrastColors(backgroundColor) {
+    if (!this.contrastModeEnabled) {
+      // Return default colors if contrast mode is disabled
+      return {
+        backgroundColor: '#000000',
+        color: '#ffffff',
+        borderColor: '#333333'
+      };
+    }
+
+    const [r, g, b] = this.parseRgbColor(backgroundColor);
+    const luminance = this.calculateLuminance(r, g, b);
+    
+    // Determine if background is light or dark (threshold of 0.5)
+    const isLightBackground = luminance > 0.5;
+    
+    if (isLightBackground) {
+      // Light background: use dark redaction with light text
+      return {
+        backgroundColor: '#1a1a1a',
+        color: '#ffffff',
+        borderColor: '#333333'
+      };
+    } else {
+      // Dark background: use light redaction with dark text
+      return {
+        backgroundColor: '#f0f0f0',
+        color: '#1a1a1a',
+        borderColor: '#cccccc'
+      };
+    }
+  }
+
+  getHoverColor(backgroundColor) {
+    // Generate a slightly different color for hover state
+    const [r, g, b] = this.parseRgbColor(backgroundColor);
+    
+    // Determine if the background is light or dark
+    const luminance = this.calculateLuminance(r, g, b);
+    const isLight = luminance > 0.5;
+    
+    if (isLight) {
+      // For light backgrounds, make it slightly darker
+      const newR = Math.max(0, r - 30);
+      const newG = Math.max(0, g - 30);
+      const newB = Math.max(0, b - 30);
+      return `rgb(${newR}, ${newG}, ${newB})`;
+    } else {
+      // For dark backgrounds, make it slightly lighter
+      const newR = Math.min(255, r + 30);
+      const newG = Math.min(255, g + 30);
+      const newB = Math.min(255, b + 30);
+      return `rgb(${newR}, ${newG}, ${newB})`;
+    }
   }
 
   setupMutationObserver() {

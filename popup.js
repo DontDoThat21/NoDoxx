@@ -2,6 +2,7 @@
 
 document.addEventListener('DOMContentLoaded', () => {
   const toggle = document.getElementById('enableToggle');
+  const contrastToggle = document.getElementById('contrastToggle');
   const status = document.getElementById('status');
   const statusIndicator = status.querySelector('.status-indicator');
   const statusText = status.querySelector('span');
@@ -12,11 +13,13 @@ document.addEventListener('DOMContentLoaded', () => {
   const userStringsList = document.getElementById('userStringsList');
 
   // Load current state
-  chrome.storage.sync.get(['nodoxxingEnabled', 'userStrings'], (result) => {
+  chrome.storage.sync.get(['nodoxxingEnabled', 'userStrings', 'contrastModeEnabled'], (result) => {
     const isEnabled = result.nodoxxingEnabled !== false; // Default to enabled
+    const contrastModeEnabled = result.contrastModeEnabled !== false; // Default to enabled
     const userStrings = result.userStrings || [];
     
     toggle.checked = isEnabled;
+    contrastToggle.checked = contrastModeEnabled;
     updateStatus(isEnabled);
     renderUserStrings(userStrings);
   });
@@ -28,6 +31,14 @@ document.addEventListener('DOMContentLoaded', () => {
       nodoxxingEnabled: isEnabled
     });
     updateStatus(isEnabled);
+  });
+
+  // Handle contrast mode toggle change
+  contrastToggle.addEventListener('change', () => {
+    const contrastModeEnabled = contrastToggle.checked;
+    chrome.storage.sync.set({
+      contrastModeEnabled: contrastModeEnabled
+    });
   });
 
   // Handle add string button
@@ -46,6 +57,11 @@ document.addEventListener('DOMContentLoaded', () => {
       const isEnabled = changes.nodoxxingEnabled.newValue;
       toggle.checked = isEnabled;
       updateStatus(isEnabled);
+    }
+    
+    if (changes.contrastModeEnabled) {
+      const contrastModeEnabled = changes.contrastModeEnabled.newValue;
+      contrastToggle.checked = contrastModeEnabled;
     }
     
     if (changes.userStrings) {

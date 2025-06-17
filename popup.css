@@ -93,6 +93,13 @@ input:checked + .slider:before {
   font-weight: 500;
 }
 
+.feature-description {
+  font-size: 11px;
+  color: #aaa;
+  margin: 2px 0 0 0;
+  font-style: italic;
+}
+
 .status {
   display: flex;
   align-items: center;
