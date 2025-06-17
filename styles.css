@@ -1,5 +1,10 @@
 /* NoDoxxing Extension Styles */
 
+/* Hide page content initially to prevent leakage during processing */
+body.nodoxxing-processing {
+  visibility: hidden !important;
+}
+
 .nodoxxing-container .nodoxxing-redacted {
   background-color: #000000;
   color: #ffffff;
