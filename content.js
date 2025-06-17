@@ -43,45 +43,61 @@ class NoDoxxingRedactor {
 
   init() {
     // Check if extension is enabled and load user strings
-    chrome.storage.sync.get(['nodoxxingEnabled', 'userStrings'], (result) => {
-      this.isEnabled = result.nodoxxingEnabled !== false; // Default to enabled
-      this.userStrings = result.userStrings || []; // Default to empty array
-      this.updateUserPatterns();
-      if (this.isEnabled) {
-        this.startRedaction();
-      } else {
-        // If disabled, remove processing class immediately
-        this.revealPage();
-      }
-    });
-
-    // Listen for storage changes
-    chrome.storage.onChanged.addListener((changes, namespace) => {
-      if (changes.nodoxxingEnabled) {
-        this.isEnabled = changes.nodoxxingEnabled.newValue;
-        if (this.isEnabled) {
-          // Hide page again for re-processing
-          this.hidePage();
-          this.startRedaction();
-        } else {
-          this.restoreOriginalContent();
+    try {
+      chrome.storage.sync.get(['nodoxxingEnabled', 'userStrings'], (result) => {
+        try {
+          this.isEnabled = result.nodoxxingEnabled !== false; // Default to enabled
+          this.userStrings = result.userStrings || []; // Default to empty array
+          this.updateUserPatterns();
+          if (this.isEnabled) {
+            this.startRedaction();
+          } else {
+            // If disabled, remove processing class immediately
+            this.revealPage();
+          }
+        } catch (error) {
+          console.error('NoDoxx: Error in storage callback:', error);
+          // Fallback: reveal page to prevent permanent hiding
           this.revealPage();
         }
-      }
-      
-      // Update user strings when they change
-      if (changes.userStrings) {
-        this.userStrings = changes.userStrings.newValue || [];
-        this.updateUserPatterns();
-        // Re-process content if extension is enabled
-        if (this.isEnabled) {
-          // Hide page again for re-processing
-          this.hidePage();
-          this.restoreOriginalContent();
-          this.startRedaction();
+      });
+    } catch (error) {
+      console.error('NoDoxx: Error accessing chrome.storage:', error);
+      // Fallback: reveal page to prevent permanent hiding
+      this.revealPage();
+    }
+
+    // Listen for storage changes
+    try {
+      chrome.storage.onChanged.addListener((changes, namespace) => {
+        if (changes.nodoxxingEnabled) {
+          this.isEnabled = changes.nodoxxingEnabled.newValue;
+          if (this.isEnabled) {
+            // Hide page again for re-processing
+            this.hidePage();
+            this.startRedaction();
+          } else {
+            this.restoreOriginalContent();
+            this.revealPage();
+          }
         }
-      }
-    });
+        
+        // Update user strings when they change
+        if (changes.userStrings) {
+          this.userStrings = changes.userStrings.newValue || [];
+          this.updateUserPatterns();
+          // Re-process content if extension is enabled
+          if (this.isEnabled) {
+            // Hide page again for re-processing
+            this.hidePage();
+            this.restoreOriginalContent();
+            this.startRedaction();
+          }
+        }
+      });
+    } catch (error) {
+      console.error('NoDoxx: Error setting up storage listener:', error);
+    }
   }
 
   updateUserPatterns() {
@@ -128,6 +144,11 @@ class NoDoxxingRedactor {
     }
     if (document.documentElement) {
       document.documentElement.classList.add('nodoxxing-ready');
+    }
+    
+    // Clear safety timeout since page is now properly revealed
+    if (typeof safetyTimeout !== 'undefined') {
+      clearTimeout(safetyTimeout);
     }
   }
 
@@ -352,6 +373,18 @@ function injectImmediateHidingCSS() {
 
 // Inject hiding CSS immediately
 injectImmediateHidingCSS();
+
+// Safety timeout to ensure page is never permanently hidden
+// This protects against extension errors or edge cases
+let safetyTimeout = setTimeout(() => {
+  console.warn('NoDoxx: Safety timeout triggered, revealing page');
+  if (document.documentElement) {
+    document.documentElement.classList.add('nodoxxing-ready');
+  }
+  if (document.body) {
+    document.body.classList.remove('nodoxxing-processing');
+  }
+}, 5000); // 5 second maximum hiding time
 
 // Initialize the redactor when DOM is ready
 let redactor;
