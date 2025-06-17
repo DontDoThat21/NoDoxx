@@ -178,6 +178,22 @@
             `;
             document.body.appendChild(dynamicSection2);
         }, 4000);
+        
+        // Test toggle functionality
+        let contrastTestCount = 0;
+        setInterval(() => {
+            if (contrastTestCount < 3) {
+                const toggleSection = document.createElement('div');
+                toggleSection.className = `test-section ${contrastTestCount % 2 === 0 ? 'light-background' : 'dark-background'}`;
+                toggleSection.innerHTML = `
+                    <h3>Toggle Test Section ${contrastTestCount + 1}</h3>
+                    <p>Testing contrast adaptation: toggle.test@example.com</p>
+                    <p>Phone: (555) TOGGLE-${contrastTestCount + 1}</p>
+                `;
+                document.body.appendChild(toggleSection);
+                contrastTestCount++;
+            }
+        }, 6000);
     </script>
 </body>
 </html>

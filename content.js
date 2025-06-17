@@ -214,6 +214,15 @@ class NoDoxxingRedactor {
       redactedSpan.style.color = contrastColors.color;
       redactedSpan.style.borderColor = contrastColors.borderColor;
       
+      // Also set a custom hover color that's slightly different
+      const hoverColor = this.getHoverColor(contrastColors.backgroundColor);
+      redactedSpan.addEventListener('mouseenter', () => {
+        redactedSpan.style.backgroundColor = hoverColor;
+      });
+      redactedSpan.addEventListener('mouseleave', () => {
+        redactedSpan.style.backgroundColor = contrastColors.backgroundColor;
+      });
+      
       // Replace text node with redacted span
       textNode.parentElement.replaceChild(redactedSpan, textNode);
     } else {
@@ -239,34 +248,55 @@ class NoDoxxingRedactor {
   getElementBackgroundColor(element) {
     // Walk up the DOM tree to find the effective background color
     let currentElement = element;
-    while (currentElement && currentElement !== document.body) {
-      const computedStyle = window.getComputedStyle(currentElement);
-      const backgroundColor = computedStyle.backgroundColor;
-      
-      // If we find a non-transparent background color, use it
-      if (backgroundColor && backgroundColor !== 'rgba(0, 0, 0, 0)' && backgroundColor !== 'transparent') {
-        return backgroundColor;
+    let attempts = 0;
+    const maxAttempts = 10; // Prevent infinite loops
+    
+    while (currentElement && currentElement !== document.body && attempts < maxAttempts) {
+      try {
+        const computedStyle = window.getComputedStyle(currentElement);
+        const backgroundColor = computedStyle.backgroundColor;
+        
+        // If we find a non-transparent background color, use it
+        if (backgroundColor && backgroundColor !== 'rgba(0, 0, 0, 0)' && backgroundColor !== 'transparent') {
+          return backgroundColor;
+        }
+      } catch (error) {
+        // If getComputedStyle fails, continue to parent
+        console.debug('NoDoxxing: Failed to get computed style for element', error);
       }
       
       currentElement = currentElement.parentElement;
+      attempts++;
     }
     
     // Default to body background color or white
-    const bodyStyle = window.getComputedStyle(document.body);
-    const bodyBg = bodyStyle.backgroundColor;
-    return (bodyBg && bodyBg !== 'rgba(0, 0, 0, 0)' && bodyBg !== 'transparent') ? bodyBg : 'rgb(255, 255, 255)';
+    try {
+      const bodyStyle = window.getComputedStyle(document.body);
+      const bodyBg = bodyStyle.backgroundColor;
+      return (bodyBg && bodyBg !== 'rgba(0, 0, 0, 0)' && bodyBg !== 'transparent') ? bodyBg : 'rgb(255, 255, 255)';
+    } catch (error) {
+      // If all else fails, return white
+      console.debug('NoDoxxing: Failed to get body background color', error);
+      return 'rgb(255, 255, 255)';
+    }
   }
 
   parseRgbColor(colorString) {
     // Parse various color formats to RGB values
-    if (colorString.startsWith('rgb(')) {
-      const values = colorString.match(/\d+/g);
+    if (!colorString || typeof colorString !== 'string') {
+      return [255, 255, 255]; // Default to white
+    }
+    
+    const color = colorString.trim();
+    
+    if (color.startsWith('rgb(')) {
+      const values = color.match(/\d+/g);
       return values ? values.map(Number) : [255, 255, 255];
-    } else if (colorString.startsWith('rgba(')) {
-      const values = colorString.match(/[\d.]+/g);
+    } else if (color.startsWith('rgba(')) {
+      const values = color.match(/[\d.]+/g);
       return values ? values.slice(0, 3).map(Number) : [255, 255, 255];
-    } else if (colorString.startsWith('#')) {
-      const hex = colorString.slice(1);
+    } else if (color.startsWith('#')) {
+      const hex = color.slice(1);
       if (hex.length === 3) {
         return [
           parseInt(hex[0] + hex[0], 16),
@@ -280,6 +310,27 @@ class NoDoxxingRedactor {
           parseInt(hex.slice(4, 6), 16)
         ];
       }
+    } else if (color === 'transparent' || color === 'inherit') {
+      return [255, 255, 255]; // Default to white for transparent
+    }
+    
+    // Try to handle named colors (basic ones)
+    const namedColors = {
+      'white': [255, 255, 255],
+      'black': [0, 0, 0],
+      'red': [255, 0, 0],
+      'green': [0, 128, 0],
+      'blue': [0, 0, 255],
+      'yellow': [255, 255, 0],
+      'cyan': [0, 255, 255],
+      'magenta': [255, 0, 255],
+      'gray': [128, 128, 128],
+      'grey': [128, 128, 128]
+    };
+    
+    const lowerColor = color.toLowerCase();
+    if (namedColors[lowerColor]) {
+      return namedColors[lowerColor];
     }
     
     // Default to white if parsing fails
@@ -288,6 +339,11 @@ class NoDoxxingRedactor {
 
   calculateLuminance(r, g, b) {
     // Calculate relative luminance using sRGB color space
+    // Ensure values are within valid range
+    r = Math.max(0, Math.min(255, r || 0));
+    g = Math.max(0, Math.min(255, g || 0));
+    b = Math.max(0, Math.min(255, b || 0));
+    
     const [rs, gs, bs] = [r, g, b].map(c => {
       c = c / 255;
       return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
@@ -325,6 +381,29 @@ class NoDoxxingRedactor {
         color: '#1a1a1a',
         borderColor: '#cccccc'
       };
+    }
+  }
+
+  getHoverColor(backgroundColor) {
+    // Generate a slightly different color for hover state
+    const [r, g, b] = this.parseRgbColor(backgroundColor);
+    
+    // Determine if the background is light or dark
+    const luminance = this.calculateLuminance(r, g, b);
+    const isLight = luminance > 0.5;
+    
+    if (isLight) {
+      // For light backgrounds, make it slightly darker
+      const newR = Math.max(0, r - 30);
+      const newG = Math.max(0, g - 30);
+      const newB = Math.max(0, b - 30);
+      return `rgb(${newR}, ${newG}, ${newB})`;
+    } else {
+      // For dark backgrounds, make it slightly lighter
+      const newR = Math.min(255, r + 30);
+      const newG = Math.min(255, g + 30);
+      const newB = Math.min(255, b + 30);
+      return `rgb(${newR}, ${newG}, ${newB})`;
     }
   }
 
