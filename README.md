@@ -1,7 +1,9 @@
 # NoDoxxing - Anti-REDACTED Extension
 
-![image](https://REDACTED/assets/b52e5e9a-af8e-4728-b52b-90REDACTED)
-![image](https://REDACTED/assets/575dd9ea-74e8-44e5-bf12-84d665d58bdf)
+![image](https://github.com/user-attachments/assets/62da11c6-08d4-4938-ad8c-95ae495619a2)
+![image](https://github.com/user-attachments/assets/8678f1a1-21a8-4956-bd05-1e74d6489ab3)
+
+![example](https://github.com/user-attachments/assets/305bc15f-dcd3-4324-a0dd-ee5225b1c2f8)
 
 🔒 **Automatic privacy protection for screen sharing and browsing**
 
