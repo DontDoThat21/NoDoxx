@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Leakage Fix - NoDoxx Extension</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .test-section h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .instructions {
+            background-color: #f0f8ff;
+            border: 1px solid #0066cc;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test Leakage Fix - NoDoxx Extension</h1>
+    
+    <div class="instructions">
+        <h3>Testing Instructions:</h3>
+        <ol>
+            <li>Load this page in Chrome with the NoDoxx extension enabled</li>
+            <li>The page should NOT flash/show sensitive data before processing</li>
+            <li>The page should appear seamlessly with redacted content</li>
+            <li>If you see sensitive data briefly, the fix needs improvement</li>
+        </ol>
+    </div>
+    
+    <div class="test-section">
+        <h3>Sensitive Data That Should Not Flash</h3>
+        <p>Email: john.doe@secretcompany.com</p>
+        <p>Phone: (555) 123-4567</p>
+        <p>SSN: 123-45-6789</p>
+        <p>Credit Card: 4532 1234 5678 9012</p>
+    </div>
+    
+    <div class="test-section">
+        <h3>More Sensitive Information</h3>
+        <p>Contact Sarah Williams at sarah.williams@confidential.org</p>
+        <p>Server IP: 192.168.1.100</p>
+        <p>Address: 123 Secret Street, Hidden City</p>
+    </div>
+    
+    <div class="test-section">
+        <h3>Dynamic Content Test</h3>
+        <button onclick="addSensitiveContent()">Add More Sensitive Data</button>
+        <div id="dynamic-area"></div>
+    </div>
+    
+    <script>
+        function addSensitiveContent() {
+            const area = document.getElementById('dynamic-area');
+            const p = document.createElement('p');
+            p.innerHTML = 'Dynamic: contact@dynamic.com, phone: 555-999-8888, SSN: 987-65-4321';
+            area.appendChild(p);
+        }
+        
+        // Add delayed content to test mutation observer
+        setTimeout(() => {
+            const area = document.getElementById('dynamic-area');
+            const p = document.createElement('p');
+            p.innerHTML = 'Delayed: Bob Smith, email: bob@delayed.com, card: 5555-4444-3333-2222';
+            area.appendChild(p);
+        }, 2000);
+    </script>
+</body>
+</html>
