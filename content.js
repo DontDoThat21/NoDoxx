@@ -81,7 +81,7 @@ class NoDoxxingRedactor {
     this.userPatterns = this.userStrings.map(userString => {
       // Escape special regex characters in user string
       const escapedString = userString.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      // Create case-insensitive global pattern that matches whole words
+      // Use word boundaries for better matching - but be careful with special chars
       return new RegExp(`\\b${escapedString}\\b`, 'gi');
     });
   }
@@ -121,7 +121,7 @@ class NoDoxxingRedactor {
     }
 
     // Apply user-defined string redactions
-    if (this.userStrings && this.userStrings.length > 0) {
+    if (this.userStrings && this.userStrings.length > 0 && this.userPatterns) {
       for (const userPattern of this.userPatterns) {
         if (userPattern.test(content)) {
           hasRedactions = true;
