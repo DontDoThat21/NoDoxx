@@ -301,27 +301,15 @@ class NoDoxxingRedactor {
 
 // Hide page content immediately to prevent leakage
 // Use optional chaining and add fallback for when body doesn't exist yet
-if (document.body) {
-  document.body.classList.add('nodoxxing-processing');
-} else {
-  // If body doesn't exist yet, add event listener to hide it as soon as it's available
-  const hideBodyWhenReady = () => {
-    if (document.body) {
-      document.body.classList.add('nodoxxing-processing');
-    } else {
-      requestAnimationFrame(hideBodyWhenReady);
-    }
-  };
-  hideBodyWhenReady();
-}
+const redactor = new NoDoxxingRedactor();
+redactor.hidePage();
 
 // Initialize the redactor when the page loads
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => {
     // Ensure body is hidden during processing
-    if (document.body) {
-      document.body.classList.add('nodoxxing-processing');
-    }
+    const redactor = new NoDoxxingRedactor();
+    redactor.hidePage();
     // Small delay to ensure DOM is fully ready
     setTimeout(() => {
       new NoDoxxingRedactor();
