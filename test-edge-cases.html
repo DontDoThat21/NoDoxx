@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edge Case Test - NoDoxx Extension</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .test-section h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .instructions {
+            background-color: #f0f8ff;
+            border: 1px solid #0066cc;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Edge Case Test - Content Loaded Before Extension</h1>
+    
+    <div class="instructions">
+        <h3>Testing Edge Cases:</h3>
+        <ol>
+            <li>This page loads content immediately</li>
+            <li>Test with extension enabled/disabled states</li>
+            <li>Test dynamic content additions</li>
+            <li>Check behavior when toggling extension on/off</li>
+        </ol>
+    </div>
+    
+    <div class="test-section">
+        <h3>Pre-loaded Sensitive Content</h3>
+        <p>Email: test@example.com</p>
+        <p>Phone: (555) 123-4567</p>
+        <p>Credit Card: 4532 1234 5678 9012</p>
+    </div>
+    
+    <div class="test-section">
+        <h3>Rapid Dynamic Content</h3>
+        <button onclick="addRapidContent()">Add Content Rapidly</button>
+        <div id="rapid-area"></div>
+    </div>
+    
+    <script>
+        // Add content immediately on page load
+        let counter = 0;
+        
+        function addRapidContent() {
+            for (let i = 0; i < 5; i++) {
+                setTimeout(() => {
+                    const area = document.getElementById('rapid-area');
+                    const p = document.createElement('p');
+                    p.innerHTML = `Rapid ${++counter}: contact${counter}@test.com, phone: 555-${counter}${counter}${counter}-${counter}${counter}${counter}${counter}`;
+                    area.appendChild(p);
+                }, i * 50); // Add every 50ms
+            }
+        }
+        
+        // Simulate content that loads very quickly
+        setTimeout(() => {
+            const area = document.getElementById('rapid-area');
+            const p = document.createElement('p');
+            p.innerHTML = 'Quick load: sensitive@data.com, card: 1111-2222-3333-4444';
+            area.appendChild(p);
+        }, 10);
+    </script>
+</body>
+</html>
