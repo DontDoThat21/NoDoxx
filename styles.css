@@ -2,7 +2,7 @@
 
 /* Hide page content initially to prevent leakage during processing */
 /* Primary hiding mechanism - injected via JavaScript for immediate effect */
-html:not(.nodoxxing-ready), html:not(.nodoxxing-ready) body {
+html:not(.nodoxxing-ready), body:not(.nodoxxing-ready) {
   visibility: hidden !important;
   opacity: 0 !important;
 }
