@@ -1,9 +1,10 @@
 // NoDoxxing Background Script
 
 chrome.runtime.onInstalled.addListener(() => {
-  // Set default enabled state
+  // Set default enabled state and contrast mode
   chrome.storage.sync.set({
-    nodoxxingEnabled: true
+    nodoxxingEnabled: true,
+    contrastModeEnabled: true
   });
 });
 

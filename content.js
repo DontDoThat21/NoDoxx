@@ -3,6 +3,7 @@
 class NoDoxxingRedactor {
   constructor() {
     this.isEnabled = true;
+    this.contrastModeEnabled = true; // Default enabled as per requirement
     this.patterns = {
       // Email addresses
       email: /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g,
@@ -42,9 +43,10 @@ class NoDoxxingRedactor {
   }
 
   init() {
-    // Check if extension is enabled and load user strings
-    chrome.storage.sync.get(['nodoxxingEnabled', 'userStrings'], (result) => {
+    // Check if extension is enabled and load user strings and contrast mode setting
+    chrome.storage.sync.get(['nodoxxingEnabled', 'userStrings', 'contrastModeEnabled'], (result) => {
       this.isEnabled = result.nodoxxingEnabled !== false; // Default to enabled
+      this.contrastModeEnabled = result.contrastModeEnabled !== false; // Default to enabled
       this.userStrings = result.userStrings || []; // Default to empty array
       this.updateUserPatterns();
       if (this.isEnabled) {
@@ -78,6 +80,19 @@ class NoDoxxingRedactor {
         // Re-process content if extension is enabled
         if (this.isEnabled) {
           // Hide page again for re-processing
+          if (document.body) {
+            document.body.classList.add('nodoxxing-processing');
+          }
+          this.restoreOriginalContent();
+          this.startRedaction();
+        }
+      }
+      
+      // Update contrast mode when it changes
+      if (changes.contrastModeEnabled) {
+        this.contrastModeEnabled = changes.contrastModeEnabled.newValue;
+        // Re-process content if extension is enabled
+        if (this.isEnabled) {
           if (document.body) {
             document.body.classList.add('nodoxxing-processing');
           }
@@ -190,6 +205,15 @@ class NoDoxxingRedactor {
       redactedSpan.textContent = content;
       redactedSpan.title = 'Sensitive data redacted by NoDoxxing extension';
       
+      // Apply contrast-aware styling
+      const parentBgColor = this.getElementBackgroundColor(textNode.parentElement);
+      const contrastColors = this.getContrastColors(parentBgColor);
+      
+      // Apply the contrast colors directly to the element
+      redactedSpan.style.backgroundColor = contrastColors.backgroundColor;
+      redactedSpan.style.color = contrastColors.color;
+      redactedSpan.style.borderColor = contrastColors.borderColor;
+      
       // Replace text node with redacted span
       textNode.parentElement.replaceChild(redactedSpan, textNode);
     } else {
@@ -209,6 +233,99 @@ class NoDoxxingRedactor {
     }
     
     return false;
+  }
+
+  // Color analysis functions for contrast mode
+  getElementBackgroundColor(element) {
+    // Walk up the DOM tree to find the effective background color
+    let currentElement = element;
+    while (currentElement && currentElement !== document.body) {
+      const computedStyle = window.getComputedStyle(currentElement);
+      const backgroundColor = computedStyle.backgroundColor;
+      
+      // If we find a non-transparent background color, use it
+      if (backgroundColor && backgroundColor !== 'rgba(0, 0, 0, 0)' && backgroundColor !== 'transparent') {
+        return backgroundColor;
+      }
+      
+      currentElement = currentElement.parentElement;
+    }
+    
+    // Default to body background color or white
+    const bodyStyle = window.getComputedStyle(document.body);
+    const bodyBg = bodyStyle.backgroundColor;
+    return (bodyBg && bodyBg !== 'rgba(0, 0, 0, 0)' && bodyBg !== 'transparent') ? bodyBg : 'rgb(255, 255, 255)';
+  }
+
+  parseRgbColor(colorString) {
+    // Parse various color formats to RGB values
+    if (colorString.startsWith('rgb(')) {
+      const values = colorString.match(/\d+/g);
+      return values ? values.map(Number) : [255, 255, 255];
+    } else if (colorString.startsWith('rgba(')) {
+      const values = colorString.match(/[\d.]+/g);
+      return values ? values.slice(0, 3).map(Number) : [255, 255, 255];
+    } else if (colorString.startsWith('#')) {
+      const hex = colorString.slice(1);
+      if (hex.length === 3) {
+        return [
+          parseInt(hex[0] + hex[0], 16),
+          parseInt(hex[1] + hex[1], 16),
+          parseInt(hex[2] + hex[2], 16)
+        ];
+      } else if (hex.length === 6) {
+        return [
+          parseInt(hex.slice(0, 2), 16),
+          parseInt(hex.slice(2, 4), 16),
+          parseInt(hex.slice(4, 6), 16)
+        ];
+      }
+    }
+    
+    // Default to white if parsing fails
+    return [255, 255, 255];
+  }
+
+  calculateLuminance(r, g, b) {
+    // Calculate relative luminance using sRGB color space
+    const [rs, gs, bs] = [r, g, b].map(c => {
+      c = c / 255;
+      return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+    });
+    return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
+  }
+
+  getContrastColors(backgroundColor) {
+    if (!this.contrastModeEnabled) {
+      // Return default colors if contrast mode is disabled
+      return {
+        backgroundColor: '#000000',
+        color: '#ffffff',
+        borderColor: '#333333'
+      };
+    }
+
+    const [r, g, b] = this.parseRgbColor(backgroundColor);
+    const luminance = this.calculateLuminance(r, g, b);
+    
+    // Determine if background is light or dark (threshold of 0.5)
+    const isLightBackground = luminance > 0.5;
+    
+    if (isLightBackground) {
+      // Light background: use dark redaction with light text
+      return {
+        backgroundColor: '#1a1a1a',
+        color: '#ffffff',
+        borderColor: '#333333'
+      };
+    } else {
+      // Dark background: use light redaction with dark text
+      return {
+        backgroundColor: '#f0f0f0',
+        color: '#1a1a1a',
+        borderColor: '#cccccc'
+      };
+    }
   }
 
   setupMutationObserver() {

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contrast Mode Test - NoDoxxing Extension</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+        }
+        
+        .light-background {
+            background-color: #ffffff;
+            color: #333333;
+        }
+        
+        .dark-background {
+            background-color: #1a1a1a;
+            color: #ffffff;
+        }
+        
+        .blue-background {
+            background-color: #2196F3;
+            color: #ffffff;
+        }
+        
+        .green-background {
+            background-color: #4CAF50;
+            color: #ffffff;
+        }
+        
+        .gray-background {
+            background-color: #9E9E9E;
+            color: #000000;
+        }
+        
+        .yellow-background {
+            background-color: #FFEB3B;
+            color: #333333;
+        }
+        
+        .nested-section {
+            margin: 10px 0;
+            padding: 15px;
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 4px;
+        }
+        
+        .nested-dark {
+            background-color: rgba(0,0,0,0.3);
+        }
+        
+        .nested-light {
+            background-color: rgba(255,255,255,0.3);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .description {
+            text-align: center;
+            font-style: italic;
+            margin-bottom: 30px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <h1>Contrast Mode Test Page</h1>
+    <p class="description">This page tests the adaptive contrast mode with different background colors. The redacted text should adapt to provide good contrast against each background.</p>
+    
+    <div class="test-section light-background">
+        <h3>Light Background Section</h3>
+        <p>This section has a white background. Sensitive data should appear with dark redaction.</p>
+        <p>Contact: john.doe@example.com</p>
+        <p>Phone: (555) 123-4567</p>
+        <p>Name: Alice Johnson works here.</p>
+        <p>Address: 123 Main Street, Springfield</p>
+    </div>
+    
+    <div class="test-section dark-background">
+        <h3>Dark Background Section</h3>
+        <p>This section has a dark background. Sensitive data should appear with light redaction.</p>
+        <p>Contact: jane.smith@company.com</p>
+        <p>Phone: 555.987.6543</p>
+        <p>Name: Bob Wilson manages the project.</p>
+        <p>IP Address: 192.168.1.100</p>
+    </div>
+    
+    <div class="test-section blue-background">
+        <h3>Blue Background Section</h3>
+        <p>This section has a blue background. Redaction should contrast appropriately.</p>
+        <p>GitHub: github.com/testuser</p>
+        <p>Email: support@bluecompany.org</p>
+        <p>Credit Card: 4532 1234 5678 9012</p>
+        
+        <div class="nested-section nested-dark">
+            <h4>Nested Dark Section</h4>
+            <p>Email in nested dark: nested@example.com</p>
+            <p>Phone in nested: (555) 111-2222</p>
+        </div>
+    </div>
+    
+    <div class="test-section green-background">
+        <h3>Green Background Section</h3>
+        <p>This section has a green background.</p>
+        <p>Contact: green.user@nature.com</p>
+        <p>SSN: 123-45-6789</p>
+        <p>Names: Mary Green and David Forest</p>
+    </div>
+    
+    <div class="test-section gray-background">
+        <h3>Gray Background Section</h3>
+        <p>This section has a gray background with black text.</p>
+        <p>Email: gray.matter@brain.org</p>
+        <p>Phone: +1-555-888-9999</p>
+        
+        <div class="nested-section nested-light">
+            <h4>Nested Light Section</h4>
+            <p>Email in nested light: light@nested.com</p>
+            <p>Address: 456 Oak Avenue, Downtown</p>
+        </div>
+    </div>
+    
+    <div class="test-section yellow-background">
+        <h3>Yellow Background Section</h3>
+        <p>This section has a bright yellow background.</p>
+        <p>Contact: sunny@yellow.com</p>
+        <p>Phone: 555-YELLOW</p>
+        <p>Names: Golden Brown and Bright Yellow</p>
+    </div>
+    
+    <div class="test-section">
+        <h3>Default Background Section</h3>
+        <p>This section uses the default page background (white).</p>
+        <p>Email: default@page.com</p>
+        <p>Phone: (555) DEFAULT</p>
+        <p>GitHub: @defaultuser</p>
+    </div>
+    
+    <script>
+        // Add some dynamic content to test mutation observer
+        setTimeout(() => {
+            const dynamicSection = document.createElement('div');
+            dynamicSection.className = 'test-section dark-background';
+            dynamicSection.innerHTML = `
+                <h3>Dynamically Added Dark Section</h3>
+                <p>This content was added after page load.</p>
+                <p>Email: dynamic@example.com</p>
+                <p>Phone: (555) DYNAMIC</p>
+                <p>Name: Dynamic Content Generator</p>
+            `;
+            document.body.appendChild(dynamicSection);
+        }, 2000);
+        
+        // Add content to light background after delay
+        setTimeout(() => {
+            const dynamicSection2 = document.createElement('div');
+            dynamicSection2.className = 'test-section blue-background';
+            dynamicSection2.innerHTML = `
+                <h3>Second Dynamic Section (Blue)</h3>
+                <p>Another dynamically added section.</p>
+                <p>Email: blue.dynamic@ocean.com</p>
+                <p>Credit Card: 5555-4444-3333-2222</p>
+            `;
+            document.body.appendChild(dynamicSection2);
+        }, 4000);
+    </script>
+</body>
+</html>
