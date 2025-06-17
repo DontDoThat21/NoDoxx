@@ -5,7 +5,7 @@ body.nodoxxing-processing {
   visibility: hidden !important;
 }
 
-.nodoxxing-container .nodoxxing-redacted {
+.nodoxxing-redacted {
   background-color: #000000;
   color: #ffffff;
   padding: 2px 4px;
@@ -19,13 +19,13 @@ body.nodoxxing-processing {
   letter-spacing: 0.5px;
 }
 
-.nodoxxing-container .nodoxxing-redacted:hover {
+.nodoxxing-redacted:hover {
   background-color: #222222;
   cursor: default;
 }
 
 /* Ensure redacted text doesn't break layout */
-.nodoxxing-container .nodoxxing-redacted * {
+.nodoxxing-redacted * {
   background-color: inherit;
   color: inherit;
 }
