@@ -99,14 +99,27 @@ class NoDoxxingRedactor {
   }
 
   startRedaction() {
-    // Process current content
+    // Hide page during processing
+    this.hidePage();
+    
+    // Process current content first
     this.processTextNodes();
     
     // Set up observer for dynamic content
     this.setupMutationObserver();
     
-    // Reveal page after processing is complete
-    this.revealPage();
+    // Only reveal page after initial processing is complete
+    // Use a small delay to ensure any synchronous processing has finished
+    setTimeout(() => {
+      this.revealPage();
+    }, 10);
+  }
+
+  hidePage() {
+    // Add the processing class to hide the page
+    if (document.body) {
+      document.body.classList.add('nodoxxing-processing');
+    }
   }
 
   revealPage() {
@@ -300,24 +313,17 @@ class NoDoxxingRedactor {
 }
 
 // Hide page content immediately to prevent leakage
-// Use optional chaining and add fallback for when body doesn't exist yet
-const redactor = new NoDoxxingRedactor();
-redactor.hidePage();
+if (document.body) {
+  document.body.classList.add('nodoxxing-processing');
+}
 
-// Initialize the redactor when the page loads
+// Initialize the redactor
+let redactor;
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => {
-    // Ensure body is hidden during processing
-    const redactor = new NoDoxxingRedactor();
-    redactor.hidePage();
-    // Small delay to ensure DOM is fully ready
-    setTimeout(() => {
-      new NoDoxxingRedactor();
-    }, 100);
+    redactor = new NoDoxxingRedactor();
   });
 } else {
-  // DOM already loaded, but add small delay for dynamic content
-  setTimeout(() => {
-    new NoDoxxingRedactor();
-  }, 100);
+  // DOM already loaded
+  redactor = new NoDoxxingRedactor();
 }
