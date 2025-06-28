@@ -98,6 +98,12 @@ input:checked + .slider:before {
   color: #aaa;
   margin: 2px 0 0 0;
   font-style: italic;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.toggle-container:hover .feature-description {
+  opacity: 1;
 }
 
 .status {
