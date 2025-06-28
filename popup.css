@@ -100,6 +100,7 @@ input:checked + .slider:before {
   font-style: italic;
   opacity: 0;
   transition: opacity 0.3s ease;
+  opacity: 0;
 }
 
 .toggle-container:hover .feature-description {
