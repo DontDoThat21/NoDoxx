@@ -69,6 +69,15 @@ class NoDoxxingRedactor {
       this.revealPage();
     }
 
+    // Add additional safety mechanism - check DOM readiness
+    this.ensureDOMReady(() => {
+      // If we reach here and page is still hidden, force reveal
+      if (!this.isPageVisible()) {
+        console.warn('NoDoxx: Page still hidden after DOM ready, forcing reveal');
+        this.revealPage();
+      }
+    });
+
     // Listen for storage changes
     try {
       chrome.storage.onChanged.addListener((changes, namespace) => {
@@ -140,28 +149,85 @@ class NoDoxxingRedactor {
     }, 10);
   }
 
+  ensureDOMReady(callback) {
+    // Ensure DOM elements are available before proceeding
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+      // DOM is already ready
+      callback();
+    } else {
+      // Wait for DOMContentLoaded event
+      document.addEventListener('DOMContentLoaded', () => {
+        callback();
+      });
+    }
+  }
+
+  isPageVisible() {
+    // Check if page is currently visible to user
+    try {
+      const body = document.body;
+      const html = document.documentElement;
+      
+      if (!body || !html) return false;
+      
+      // Check class-based visibility
+      const hasReadyClass = html.classList.contains('nodoxxing-ready');
+      const hasProcessingClass = body.classList.contains('nodoxxing-processing');
+      
+      // Check style-based visibility
+      const bodyStyle = window.getComputedStyle(body);
+      const htmlStyle = window.getComputedStyle(html);
+      
+      const bodyVisible = bodyStyle.visibility !== 'hidden' && bodyStyle.opacity !== '0';
+      const htmlVisible = htmlStyle.visibility !== 'hidden' && htmlStyle.opacity !== '0';
+      
+      return hasReadyClass && !hasProcessingClass && bodyVisible && htmlVisible;
+    } catch (error) {
+      console.error('NoDoxx: Error checking page visibility:', error);
+      return false;
+    }
+  }
+
   hidePage() {
     // Remove ready class and add processing class to hide the page
-    if (document.documentElement) {
-      document.documentElement.classList.remove('nodoxxing-ready');
-    }
-    if (document.body) {
-      document.body.classList.add('nodoxxing-processing');
+    try {
+      if (document.documentElement) {
+        document.documentElement.classList.remove('nodoxxing-ready');
+        document.documentElement.style.visibility = 'hidden';
+        document.documentElement.style.opacity = '0';
+      }
+      if (document.body) {
+        document.body.classList.add('nodoxxing-processing');
+        document.body.style.visibility = 'hidden';
+        document.body.style.opacity = '0';
+      }
+    } catch (error) {
+      console.error('NoDoxx: Error in hidePage:', error);
     }
   }
 
   revealPage() {
     // Remove the processing class and add ready class to show the page
-    if (document.body) {
-      document.body.classList.remove('nodoxxing-processing');
-    }
-    if (document.documentElement) {
-      document.documentElement.classList.add('nodoxxing-ready');
-    }
-    
-    // Clear safety timeout since page is now properly revealed
-    if (typeof safetyTimeout !== 'undefined') {
-      clearTimeout(safetyTimeout);
+    try {
+      if (document.body) {
+        document.body.classList.remove('nodoxxing-processing');
+        document.body.style.visibility = 'visible';
+        document.body.style.opacity = '1';
+      }
+      if (document.documentElement) {
+        document.documentElement.classList.add('nodoxxing-ready');
+        document.documentElement.style.visibility = 'visible';
+        document.documentElement.style.opacity = '1';
+      }
+      
+      // Clear safety timeout since page is now properly revealed
+      if (typeof safetyTimeout !== 'undefined') {
+        clearTimeout(safetyTimeout);
+      }
+    } catch (error) {
+      console.error('NoDoxx: Error in revealPage:', error);
+      // Last resort - use force reveal
+      forceRevealPage();
     }
   }
 
@@ -547,21 +613,34 @@ function injectImmediateHidingCSS() {
     }
   `;
   
-  // Insert at the very beginning of head, or create head if it doesn't exist
-  if (document.head) {
-    document.head.insertBefore(style, document.head.firstChild);
-  } else {
-    // If head doesn't exist yet, create it
-    const head = document.createElement('head');
-    head.appendChild(style);
-    if (document.documentElement) {
+  try {
+    // Try to insert at the very beginning of head
+    if (document.head) {
+      document.head.insertBefore(style, document.head.firstChild);
+    } else if (document.documentElement) {
+      // If head doesn't exist yet, create it
+      const head = document.createElement('head');
+      head.appendChild(style);
       document.documentElement.insertBefore(head, document.documentElement.firstChild);
     } else {
-      // Last resort - wait for document element
-      document.addEventListener('DOMContentLoaded', () => {
-        document.head.insertBefore(style, document.head.firstChild);
-      });
+      // Last resort - append to document when it becomes available
+      const addStyle = () => {
+        if (document.head) {
+          document.head.appendChild(style);
+        } else if (document.documentElement) {
+          const head = document.createElement('head');
+          head.appendChild(style);
+          document.documentElement.appendChild(head);
+        } else {
+          // Try again in 10ms
+          setTimeout(addStyle, 10);
+        }
+      };
+      addStyle();
     }
+  } catch (error) {
+    console.error('NoDoxx: Error injecting hiding CSS:', error);
+    // If we can't inject CSS, don't hide the page
   }
 }
 
@@ -572,21 +651,53 @@ injectImmediateHidingCSS();
 // This protects against extension errors or edge cases
 let safetyTimeout = setTimeout(() => {
   console.warn('NoDoxx: Safety timeout triggered, revealing page');
-  if (document.documentElement) {
-    document.documentElement.classList.add('nodoxxing-ready');
+  forceRevealPage();
+}, 1000); // 1 second maximum hiding time (reduced from 5 seconds)
+
+// Force reveal page function with comprehensive fallback
+function forceRevealPage() {
+  try {
+    if (document.documentElement) {
+      document.documentElement.classList.add('nodoxxing-ready');
+      document.documentElement.style.visibility = 'visible';
+      document.documentElement.style.opacity = '1';
+    }
+    if (document.body) {
+      document.body.classList.remove('nodoxxing-processing');
+      document.body.style.visibility = 'visible';
+      document.body.style.opacity = '1';
+    }
+  } catch (error) {
+    console.error('NoDoxx: Error in forceRevealPage:', error);
   }
-  if (document.body) {
-    document.body.classList.remove('nodoxxing-processing');
-  }
-}, 5000); // 5 second maximum hiding time
+}
 
 // Initialize the redactor when DOM is ready
 let redactor;
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => {
+
+function initializeRedactor() {
+  try {
+    // Ensure DOM elements exist before creating redactor
+    if (!document.body || !document.documentElement) {
+      // If DOM isn't ready, wait a bit and try again
+      setTimeout(initializeRedactor, 10);
+      return;
+    }
+    
     redactor = new NoDoxxingRedactor();
-  });
+  } catch (error) {
+    console.error('NoDoxx: Error initializing redactor:', error);
+    // Force reveal page if initialization fails
+    forceRevealPage();
+  }
+}
+
+// Try to initialize immediately, or wait for DOM
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initializeRedactor);
+  // Also try with a small delay in case DOMContentLoaded already fired
+  setTimeout(initializeRedactor, 50);
 } else {
   // DOM already loaded
-  redactor = new NoDoxxingRedactor();
+  initializeRedactor();
 }

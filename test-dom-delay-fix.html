@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test DOM Delay Fix - NoDoxx Extension</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .test-section h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .instructions {
+            background-color: #f0f8ff;
+            border: 1px solid #0066cc;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test DOM Delay Fix - NoDoxx Extension</h1>
+    
+    <div class="instructions">
+        <h3>Testing Instructions:</h3>
+        <ol>
+            <li>Load this page in Chrome with the NoDoxx extension enabled</li>
+            <li>The page should appear quickly (within 1 second) with content visible</li>
+            <li>Check the timing information below</li>
+            <li>Refresh the page multiple times to test consistency</li>
+            <li>If the page stays black for more than 1 second, the fix needs improvement</li>
+        </ol>
+    </div>
+    
+    <div id="timing-info" class="status warning">
+        <h3>Page Load Timing:</h3>
+        <p>Measuring page visibility timing...</p>
+    </div>
+    
+    <div class="test-section">
+        <h3>Sensitive Data That Should Be Redacted</h3>
+        <p>Email: test@example.com</p>
+        <p>Phone: (555) 123-4567</p>
+        <p>SSN: 123-45-6789</p>
+        <p>Credit Card: 4532 1234 5678 9012</p>
+    </div>
+    
+    <div class="test-section">
+        <h3>Normal Content</h3>
+        <p>This is normal content that should not be redacted.</p>
+        <p>The page should load quickly and show this content immediately.</p>
+    </div>
+    
+    <script>
+        // Track page visibility timing
+        const startTime = performance.now();
+        let isVisible = false;
+        
+        function checkVisibility() {
+            const body = document.body;
+            const html = document.documentElement;
+            
+            // Check if page is visible
+            const bodyVisible = !body.classList.contains('nodoxxing-processing') && 
+                               (body.style.visibility !== 'hidden' || body.style.opacity !== '0');
+            const htmlVisible = html.classList.contains('nodoxxing-ready') &&
+                               (html.style.visibility !== 'hidden' || html.style.opacity !== '0');
+            
+            if ((bodyVisible || htmlVisible) && !isVisible) {
+                isVisible = true;
+                const loadTime = performance.now() - startTime;
+                updateTimingInfo(loadTime);
+            }
+        }
+        
+        function updateTimingInfo(loadTime) {
+            const timingDiv = document.getElementById('timing-info');
+            const loadTimeSeconds = (loadTime / 1000).toFixed(2);
+            
+            let statusClass = 'success';
+            let statusText = 'GOOD';
+            
+            if (loadTime > 1000) {
+                statusClass = 'error';
+                statusText = 'TOO SLOW';
+            } else if (loadTime > 500) {
+                statusClass = 'warning';
+                statusText = 'ACCEPTABLE';
+            }
+            
+            timingDiv.className = `status ${statusClass}`;
+            timingDiv.innerHTML = `
+                <h3>Page Load Timing: ${statusText}</h3>
+                <p>Page became visible after: ${loadTimeSeconds} seconds</p>
+                <p>Target: &lt; 0.5 seconds (Good), &lt; 1.0 seconds (Acceptable)</p>
+            `;
+        }
+        
+        // Check visibility every 50ms
+        const visibilityInterval = setInterval(() => {
+            checkVisibility();
+            if (isVisible) {
+                clearInterval(visibilityInterval);
+            }
+        }, 50);
+        
+        // Safety timeout after 10 seconds
+        setTimeout(() => {
+            if (!isVisible) {
+                const timingDiv = document.getElementById('timing-info');
+                timingDiv.className = 'status error';
+                timingDiv.innerHTML = `
+                    <h3>Page Load Timing: FAILED</h3>
+                    <p>Page did not become visible within 10 seconds</p>
+                    <p>This indicates a serious issue with the extension</p>
+                `;
+                clearInterval(visibilityInterval);
+            }
+        }, 10000);
+    </script>
+</body>
+</html>
