@@ -151,18 +151,14 @@ class NoDoxxingRedactor {
 
   ensureDOMReady(callback) {
     // Ensure DOM elements are available before proceeding
-    if (document.body && document.documentElement) {
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+      // DOM is already ready
       callback();
     } else {
-      // Wait for DOM to be ready
-      const checkReady = () => {
-        if (document.body && document.documentElement) {
-          callback();
-        } else {
-          setTimeout(checkReady, 10);
-        }
-      };
-      checkReady();
+      // Wait for DOMContentLoaded event
+      document.addEventListener('DOMContentLoaded', () => {
+        callback();
+      });
     }
   }
 
