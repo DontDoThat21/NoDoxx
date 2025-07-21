@@ -1,4 +1,4 @@
-# NoDoxxing - Anti-REDACTED Extension
+# Redactor - Automatic redactions Extension
 
 ![image](https://github.com/user-attachments/assets/62da11c6-08d4-4938-ad8c-95ae495619a2)
 ![image](https://github.com/user-attachments/assets/8678f1a1-21a8-4956-bd05-1e74d6489ab3)
@@ -39,7 +39,7 @@ This browser extension automatically detects and redacts sensitive data on web p
 2. REDACTED/Edge and navigate to `chrome://extensions/`
 3. Enable "Developer mode" in the top right
 4. Click "Load unpacked" and select the extension folder
-5. The NoDoxxing extension should now appear in your browser toolbar
+5. The Redactor extension should now appear in your browser toolbar
 
 ### Usage
 
@@ -51,7 +51,7 @@ This browser extension automatically detects and redacts sensitive data on web p
 
 ### REDACTED Strings
 
-1. Click the NoDoxxing extension icon in your browser toolbar
+1. Click the Redactor extension icon in your browser toolbar
 2. In the popup, find the "REDACTED to Redact" section
 3. Type the string you want to redact in the input field
 4. Click "Add" or press Enter
