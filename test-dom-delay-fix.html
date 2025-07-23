@@ -95,9 +95,9 @@
             const html = document.documentElement;
             
             // Check if page is visible
-            const bodyVisible = !body.classList.contains('nodoxxing-processing') && 
+            const bodyVisible = !body.classList.contains('redactor-processing') && 
                                (body.style.visibility !== 'hidden' || body.style.opacity !== '0');
-            const htmlVisible = html.classList.contains('nodoxxing-ready') &&
+            const htmlVisible = html.classList.contains('redactor-ready') &&
                                (html.style.visibility !== 'hidden' || html.style.opacity !== '0');
             
             if ((bodyVisible || htmlVisible) && !isVisible) {

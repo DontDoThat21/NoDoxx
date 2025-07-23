@@ -1,4 +1,4 @@
-// NoDoxxing Popup Script
+// Redactor Popup Script
 
 document.addEventListener('DOMContentLoaded', () => {
   // Original elements

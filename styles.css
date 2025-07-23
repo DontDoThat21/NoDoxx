@@ -1,25 +1,25 @@
-/* NoDoxxing Extension Styles */
+/* Redactor Extension Styles */
 
 /* Hide page content initially to prevent leakage during processing */
 /* Primary hiding mechanism - injected via JavaScript for immediate effect */
-html:not(.nodoxxing-ready), body:not(.nodoxxing-ready) {
+html:not(.redactor-ready), body:not(.redactor-ready) {
   visibility: hidden !important;
   opacity: 0 !important;
 }
 
 /* Secondary hiding mechanism for processing state */
-body.nodoxxing-processing {
+body.redactor-processing {
   visibility: hidden !important;
   opacity: 0 !important;
 }
 
 /* Ready state - allow content to be visible */
-html.nodoxxing-ready, html.nodoxxing-ready body {
+html.redactor-ready, html.redactor-ready body {
   visibility: visible !important;
   opacity: 1 !important;
 }
 
-.nodoxxing-redacted {
+.redactor-redacted {
   background-color: #000000;
   color: #ffffff;
   padding: 2px 4px;
@@ -33,13 +33,13 @@ html.nodoxxing-ready, html.nodoxxing-ready body {
   letter-spacing: 0.5px;
 }
 
-.nodoxxing-redacted:hover {
+.redactor-redacted:hover {
   background-color: #222222;
   cursor: default;
 }
 
 /* Ensure redacted text doesn't break layout */
-.nodoxxing-redacted * {
+.redactor-redacted * {
   background-color: inherit;
   color: inherit;
 }
