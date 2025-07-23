@@ -160,13 +160,19 @@ class NoDoxxingRedactor {
     }
   }
   
+  normalizeDomain(domain) {
+    // Remove common subdomains like 'www.'
+    return domain.replace(/^www\./, '');
+  }
+  
   shouldProtectCurrentSite() {
     if (this.siteListMode === 'disabled') {
       return true; // Protect all sites when site list is disabled
     }
     
     const currentDomain = this.getCurrentDomain();
-    const siteInList = this.siteList.find(site => site.url === currentDomain && site.enabled);
+    const normalizedCurrentDomain = this.normalizeDomain(currentDomain);
+    const siteInList = this.siteList.find(site => this.normalizeDomain(site.url) === normalizedCurrentDomain && site.enabled);
     
     if (this.siteListMode === 'whitelist') {
       // Only protect sites that are in the list and enabled
