@@ -288,7 +288,8 @@ document.addEventListener('DOMContentLoaded', () => {
         domain = siteUrl;
       }
     } catch (error) {
-      // If URL parsing fails, use the input as-is
+      // If URL parsing fails, notify the user and use the input as-is
+      alert('Failed to parse the URL. Using the input as-is. Please ensure it is a valid domain.');
       domain = siteUrl;
     }
     
