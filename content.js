@@ -1,6 +1,6 @@
-// NoDoxxing Content Script - Automatically redacts sensitive data
+// Redactor Content Script - Automatically redacts sensitive data
 
-class NoDoxxingRedactor {
+class RedactorRedactor {
   constructor() {
     this.isEnabled = true;
     this.contrastModeEnabled = true; // Default enabled as per requirement
@@ -199,8 +199,8 @@ class NoDoxxingRedactor {
       if (!body || !html) return false;
       
       // Check class-based visibility
-      const hasReadyClass = html.classList.contains('nodoxxing-ready');
-      const hasProcessingClass = body.classList.contains('nodoxxing-processing');
+      const hasReadyClass = html.classList.contains('redactor-ready');
+      const hasProcessingClass = body.classList.contains('redactor-processing');
       
       // Check style-based visibility
       const bodyStyle = window.getComputedStyle(body);
@@ -220,12 +220,12 @@ class NoDoxxingRedactor {
     // Remove ready class and add processing class to hide the page
     try {
       if (document.documentElement) {
-        document.documentElement.classList.remove('nodoxxing-ready');
+        document.documentElement.classList.remove('redactor-ready');
         document.documentElement.style.visibility = 'hidden';
         document.documentElement.style.opacity = '0';
       }
       if (document.body) {
-        document.body.classList.add('nodoxxing-processing');
+        document.body.classList.add('redactor-processing');
         document.body.style.visibility = 'hidden';
         document.body.style.opacity = '0';
       }
@@ -238,12 +238,12 @@ class NoDoxxingRedactor {
     // Remove the processing class and add ready class to show the page
     try {
       if (document.body) {
-        document.body.classList.remove('nodoxxing-processing');
+        document.body.classList.remove('redactor-processing');
         document.body.style.visibility = 'visible';
         document.body.style.opacity = '1';
       }
       if (document.documentElement) {
-        document.documentElement.classList.add('nodoxxing-ready');
+        document.documentElement.classList.add('redactor-ready');
         document.documentElement.style.visibility = 'visible';
         document.documentElement.style.opacity = '1';
       }
@@ -266,8 +266,8 @@ class NoDoxxingRedactor {
   processTextNode(textNode) {
     // Skip if already processed or if parent is redacted
     if (!textNode || !textNode.parentElement || 
-        textNode.parentElement.classList.contains('nodoxxing-redacted') ||
-        textNode.parentElement.dataset.nodoxxingProcessed) {
+        textNode.parentElement.classList.contains('redactor-redacted') ||
+        textNode.parentElement.dataset.redactorProcessed) {
       return;
     }
 
@@ -312,13 +312,13 @@ class NoDoxxingRedactor {
       }
       
       // Mark as processed
-      textNode.parentElement.dataset.nodoxxingProcessed = 'true';
+      textNode.parentElement.dataset.redactorProcessed = 'true';
       
       // Create redacted span element
       const redactedSpan = document.createElement('span');
-      redactedSpan.className = 'nodoxxing-redacted';
+      redactedSpan.className = 'redactor-redacted';
       redactedSpan.textContent = content;
-      redactedSpan.title = 'Sensitive data redacted by NoDoxxing extension';
+      redactedSpan.title = 'Sensitive data redacted by Redactor extension';
       
       // Apply contrast-aware styling
       const parentBgColor = this.getElementBackgroundColor(textNode.parentElement);
@@ -377,7 +377,7 @@ class NoDoxxingRedactor {
         }
       } catch (error) {
         // If getComputedStyle fails, continue to parent
-        console.debug('NoDoxxing: Failed to get computed style for element', error);
+        console.debug('Redactor: Failed to get computed style for element', error);
       }
       
       currentElement = currentElement.parentElement;
@@ -391,7 +391,7 @@ class NoDoxxingRedactor {
       return (bodyBg && bodyBg !== 'rgba(0, 0, 0, 0)' && bodyBg !== 'transparent') ? bodyBg : 'rgb(255, 255, 255)';
     } catch (error) {
       // If all else fails, return white
-      console.debug('NoDoxxing: Failed to get body background color', error);
+      console.debug('Redactor: Failed to get body background color', error);
       return 'rgb(255, 255, 255)';
     }
   }
@@ -531,7 +531,7 @@ class NoDoxxingRedactor {
           mutation.addedNodes.forEach((node) => {
             if (node.nodeType === Node.TEXT_NODE) {
               this.processTextNode(node);
-            } else if (node.nodeType === Node.ELEMENT_NODE && !node.classList.contains('nodoxxing-redacted')) {
+            } else if (node.nodeType === Node.ELEMENT_NODE && !node.classList.contains('redactor-redacted')) {
               // Process text nodes within the added element
               this.processElementTextNodes(node);
             }
@@ -567,8 +567,8 @@ class NoDoxxingRedactor {
           }
           
           // Skip already processed nodes
-          if (parent.classList.contains('nodoxxing-redacted') || 
-              parent.dataset.nodoxxingProcessed) {
+          if (parent.classList.contains('redactor-redacted') || 
+              parent.dataset.redactorProcessed) {
             return NodeFilter.FILTER_REJECT;
           }
           
@@ -590,11 +590,11 @@ class NoDoxxingRedactor {
 
   restoreOriginalContent() {
     // Find all elements that have original content stored or are marked as processed
-    const elementsWithOriginalContent = document.querySelectorAll('[data-original-content], [data-nodoxxing-processed]');
+    const elementsWithOriginalContent = document.querySelectorAll('[data-original-content], [data-redactor-processed]');
     
     elementsWithOriginalContent.forEach(element => {
       // Find redacted spans within this element
-      const redactedSpans = element.querySelectorAll('.nodoxxing-redacted');
+      const redactedSpans = element.querySelectorAll('.redactor-redacted');
       
       if (redactedSpans.length > 0 && element.dataset.originalContent) {
         // Restore original text content
@@ -603,20 +603,20 @@ class NoDoxxingRedactor {
       }
       
       // Remove processing marker
-      if (element.dataset.nodoxxingProcessed) {
-        delete element.dataset.nodoxxingProcessed;
+      if (element.dataset.redactorProcessed) {
+        delete element.dataset.redactorProcessed;
       }
     });
     
     // Also remove any standalone redacted elements
-    const standaloneRedacted = document.querySelectorAll('.nodoxxing-redacted');
+    const standaloneRedacted = document.querySelectorAll('.redactor-redacted');
     standaloneRedacted.forEach(span => {
       const parent = span.parentElement;
       if (parent && parent.dataset.originalContent) {
         parent.textContent = parent.dataset.originalContent;
         delete parent.dataset.originalContent;
-        if (parent.dataset.nodoxxingProcessed) {
-          delete parent.dataset.nodoxxingProcessed;
+        if (parent.dataset.redactorProcessed) {
+          delete parent.dataset.redactorProcessed;
         }
       }
     });
@@ -631,11 +631,11 @@ function injectImmediateHidingCSS() {
       visibility: hidden !important;
       opacity: 0 !important;
     }
-    html.nodoxxing-ready, html.nodoxxing-ready body {
+    html.redactor-ready, html.redactor-ready body {
       visibility: visible !important;
       opacity: 1 !important;
     }
-    body.nodoxxing-processing {
+    body.redactor-processing {
       visibility: hidden !important;
       opacity: 0 !important;
     }
@@ -686,12 +686,12 @@ let safetyTimeout = setTimeout(() => {
 function forceRevealPage() {
   try {
     if (document.documentElement) {
-      document.documentElement.classList.add('nodoxxing-ready');
+      document.documentElement.classList.add('redactor-ready');
       document.documentElement.style.visibility = 'visible';
       document.documentElement.style.opacity = '1';
     }
     if (document.body) {
-      document.body.classList.remove('nodoxxing-processing');
+      document.body.classList.remove('redactor-processing');
       document.body.style.visibility = 'visible';
       document.body.style.opacity = '1';
     }
@@ -712,7 +712,7 @@ function initializeRedactor() {
       return;
     }
     
-    redactor = new NoDoxxingRedactor();
+    redactor = new RedactorRedactor();
   } catch (error) {
     console.error('NoDoxx: Error initializing redactor:', error);
     // Force reveal page if initialization fails

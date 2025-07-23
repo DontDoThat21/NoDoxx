@@ -19,10 +19,10 @@
 4. **Load the Extension**
    - Click "Load unpacked"
    - Select the folder containing the extension files
-   - The NoDoxxing extension should appear in your extensions list
+   - The Redactor extension should appear in your extensions list
 
 5. **Verify Installation**
-   - Look for the NoDoxxing icon in your browser toolbar
+   - Look for the Redactor icon in your browser toolbar
    - Click it to open the settings popup
    - Visit the `test.html` file to see redaction in action
 

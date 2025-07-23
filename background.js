@@ -1,4 +1,4 @@
-// NoDoxxing Background Script
+// Redactor Background Script
 
 chrome.runtime.onInstalled.addListener(() => {
   // Set default enabled state and contrast mode

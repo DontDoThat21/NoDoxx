@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "NoDoxxing - Anti-Doxx Extension",
+  "name": "Redactor - Anti-Doxx Extension",
   "version": "1.0.0",
   "description": "Automatically redacts sensitive data on web pages to prevent accidental exposure during screen sharing",
   "permissions": [
@@ -17,7 +17,7 @@
   ],
   "action": {
     "default_popup": "popup.html",
-    "default_title": "NoDoxxing Extension"
+    "default_title": "Redactor Extension"
   },
   "background": {
     "service_worker": "background.js"
