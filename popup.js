@@ -303,7 +303,7 @@ document.addEventListener('DOMContentLoaded', () => {
       
       // Check if site already exists
       if (siteList.some(site => site.url === domain)) {
-        alert('This site is already in the list.');
+        showNotification('This site is already in the list.', 'error');
         return;
       }
       
