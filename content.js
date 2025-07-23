@@ -39,10 +39,26 @@ class NoDoxxingRedactor {
     this.userStrings = [];
     this.userPatterns = [];
     
+    // Blacklisted domains where extension should never operate
+    this.blacklistedDomains = [
+      'chat.openai.com',
+      'claude.ai',
+      'irs.gov',
+      'ssa.gov',
+      'usa.gov'
+    ];
+    
     this.init();
   }
 
   init() {
+    // Check if current domain is blacklisted
+    if (this.isBlacklistedDomain()) {
+      console.log('NoDoxx: Extension disabled on blacklisted domain:', window.location.hostname);
+      this.revealPage();
+      return;
+    }
+
     // Check if extension is enabled and load user strings and contrast mode setting
     try {
       chrome.storage.sync.get(['nodoxxingEnabled', 'userStrings', 'contrastModeEnabled'], (result) => {
@@ -119,6 +135,18 @@ class NoDoxxingRedactor {
       });
     } catch (error) {
       console.error('NoDoxx: Error setting up storage listener:', error);
+    }
+  }
+
+  isBlacklistedDomain() {
+    try {
+      const currentHostname = window.location.hostname.toLowerCase();
+      return this.blacklistedDomains.some(domain => 
+        currentHostname === domain || currentHostname.endsWith('.' + domain)
+      );
+    } catch (error) {
+      console.error('NoDoxx: Error checking blacklisted domains:', error);
+      return false;
     }
   }
 
