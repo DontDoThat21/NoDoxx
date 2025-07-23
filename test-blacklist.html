@@ -83,19 +83,26 @@
         // Display current domain and blacklist status
         document.getElementById('domain-name').textContent = window.location.hostname;
         
-        // List of blacklisted domains (should match the extension)
-        const blacklistedDomains = [
-            'chat.openai.com',
-            'claude.ai',
-            'irs.gov',
-            'ssa.gov',
-            'usa.gov'
-        ];
-        
-        const currentHostname = window.location.hostname.toLowerCase();
-        const isBlacklisted = blacklistedDomains.some(domain => 
-            currentHostname === domain || currentHostname.endsWith('.' + domain)
-        );
+        // Fetch the list of blacklisted domains from the extension
+        chrome.runtime.sendMessage({ action: 'getBlacklist' }, function(response) {
+            const blacklistedDomains = response.blacklistedDomains || [];
+            
+            const currentHostname = window.location.hostname.toLowerCase();
+            const isBlacklisted = blacklistedDomains.some(domain => 
+                currentHostname === domain || currentHostname.endsWith('.' + domain)
+            );
+            
+            const statusText = document.getElementById('status-text');
+            if (isBlacklisted) {
+                statusText.textContent = 'BLACKLISTED - Extension should be disabled';
+                statusText.style.color = 'red';
+                statusText.style.fontWeight = 'bold';
+            } else {
+                statusText.textContent = 'NOT BLACKLISTED - Extension should be active';
+                statusText.style.color = 'green';
+                statusText.style.fontWeight = 'bold';
+            }
+        });
         
         const statusText = document.getElementById('status-text');
         if (isBlacklisted) {
