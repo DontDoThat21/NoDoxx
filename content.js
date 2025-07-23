@@ -58,6 +58,7 @@ class RedactorRedactor {
       console.log('NoDoxx: Extension disabled on blacklisted domain:', window.location.hostname);
       this.revealPage();
       return;
+    }
 
     // Check if extension is enabled and load user strings and contrast mode setting
     try {
