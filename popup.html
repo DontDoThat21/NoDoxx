@@ -13,52 +13,121 @@
       <p>Anti-Doxx Privacy Extension</p>
     </div>
     
-    <div class="controls">
-      <div class="toggle-container">
-        <label class="toggle-switch">
-          <input type="checkbox" id="enableToggle" checked>
-          <span class="slider"></span>
-        </label>
-        <label class="toggle-label" for="enableToggle">Enable Protection</label>
+    <!-- Tab Navigation -->
+    <div class="tab-navigation">
+      <button class="tab-btn active" data-tab="filter">Filter</button>
+      <button class="tab-btn" data-tab="sitelist">Site list</button>
+      <button class="tab-btn" data-tab="more">More</button>
+    </div>
+    
+    <!-- Filter Tab Content -->
+    <div class="tab-content active" id="filter-tab">
+      <div class="controls">
+        <div class="toggle-container">
+          <label class="toggle-switch">
+            <input type="checkbox" id="enableToggle" checked>
+            <span class="slider"></span>
+          </label>
+          <label class="toggle-label" for="enableToggle">Enable Protection</label>
+        </div>
+        
+        <div class="toggle-container">
+          <label class="toggle-switch">
+            <input type="checkbox" id="contrastToggle" checked>
+            <span class="slider"></span>
+          </label>
+          <label class="toggle-label" for="contrastToggle">Adaptive Contrast</label>
+          <p class="feature-description">Automatically adjusts redaction colors based on website background</p>
+        </div>
+        
+        <div class="status" id="status">
+          <div class="status-indicator active"></div>
+          <span>Active - Your data is protected</span>
+        </div>
       </div>
       
-      <div class="toggle-container">
-        <label class="toggle-switch">
-          <input type="checkbox" id="contrastToggle" checked>
-          <span class="slider"></span>
-        </label>
-        <label class="toggle-label" for="contrastToggle">Adaptive Contrast</label>
-        <p class="feature-description">Automatically adjusts redaction colors based on website background</p>
+      <div class="user-strings-section">
+        <h3>🔤 Custom Strings to Redact</h3>
+        <div class="input-container">
+          <input type="text" id="newStringInput" placeholder="Enter string to redact...">
+          <button id="addStringBtn">Add</button>
+        </div>
+        <ul id="userStringsList" class="user-strings-list"></ul>
       </div>
       
-      <div class="status" id="status">
-        <div class="status-indicator active"></div>
-        <span>Active - Your data is protected</span>
+      <div class="info">
+        <h3>Protected Data Types:</h3>
+        <ul>
+          <li>📧 Email addresses</li>
+          <li>📱 Phone numbers</li>
+          <li>💳 Credit card numbers</li>
+          <li>🆔 Social Security numbers</li>
+          <li>🌐 IP addresses</li>
+          <li>👤 GitHub usernames</li>
+          <li>👥 Personal names</li>
+          <li>🏠 Street addresses</li>
+          <li>🔤 Custom strings (user-defined)</li>
+        </ul>
       </div>
     </div>
     
-    <div class="user-strings-section">
-      <h3>🔤 Custom Strings to Redact</h3>
-      <div class="input-container">
-        <input type="text" id="newStringInput" placeholder="Enter string to redact...">
-        <button id="addStringBtn">Add</button>
+    <!-- Site List Tab Content -->
+    <div class="tab-content" id="sitelist-tab">
+      <div class="site-list-controls">
+        <div class="site-mode-container">
+          <h3>Protection Mode</h3>
+          <div class="mode-options">
+            <label class="mode-option">
+              <input type="radio" name="siteMode" value="disabled" checked>
+              <span>Protect all sites</span>
+            </label>
+            <label class="mode-option">
+              <input type="radio" name="siteMode" value="whitelist">
+              <span>Protect only listed sites</span>
+            </label>
+            <label class="mode-option">
+              <input type="radio" name="siteMode" value="blacklist">
+              <span>Don't protect listed sites</span>
+            </label>
+          </div>
+        </div>
+        
+        <div class="current-site-section">
+          <h3>Current Site</h3>
+          <div class="current-site-info">
+            <span id="currentSiteUrl">Loading...</span>
+            <button id="addCurrentSiteBtn" class="add-site-btn">Add to list</button>
+          </div>
+        </div>
+        
+        <div class="add-site-section">
+          <h3>Add Site Manually</h3>
+          <div class="input-container">
+            <input type="text" id="newSiteInput" placeholder="Enter website URL...">
+            <button id="addSiteBtn">Add</button>
+          </div>
+        </div>
+        
+        <div class="site-list-section">
+          <h3>Sites List</h3>
+          <ul id="sitesList" class="sites-list"></ul>
+        </div>
       </div>
-      <ul id="userStringsList" class="user-strings-list"></ul>
     </div>
     
-    <div class="info">
-      <h3>Protected Data Types:</h3>
-      <ul>
-        <li>📧 Email addresses</li>
-        <li>📱 Phone numbers</li>
-        <li>💳 Credit card numbers</li>
-        <li>🆔 Social Security numbers</li>
-        <li>🌐 IP addresses</li>
-        <li>👤 GitHub usernames</li>
-        <li>👥 Personal names</li>
-        <li>🏠 Street addresses</li>
-        <li>🔤 Custom strings (user-defined)</li>
-      </ul>
+    <!-- More Tab Content -->
+    <div class="tab-content" id="more-tab">
+      <div class="more-content">
+        <h3>About</h3>
+        <p>NoDoxxing Extension v1.0.0</p>
+        <p>Automatically redacts sensitive data to protect your privacy during screen sharing.</p>
+        
+        <h3>Keyboard Shortcut</h3>
+        <p>Setup a hotkey for adding the current site to your list.</p>
+        
+        <h3>Help</h3>
+        <p>For support and documentation, visit our GitHub repository.</p>
+      </div>
     </div>
     
     <div class="footer">
