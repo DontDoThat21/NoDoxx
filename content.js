@@ -43,15 +43,22 @@ class NoDoxxingRedactor {
   }
 
   init() {
-    // Check if extension is enabled and load user strings and contrast mode setting
+    // Check if extension is enabled and load user strings, contrast mode setting, and site list
     try {
-      chrome.storage.sync.get(['nodoxxingEnabled', 'userStrings', 'contrastModeEnabled'], (result) => {
+      chrome.storage.sync.get(['nodoxxingEnabled', 'userStrings', 'contrastModeEnabled', 'siteList', 'siteListMode'], (result) => {
         try {
           this.isEnabled = result.nodoxxingEnabled !== false; // Default to enabled
           this.contrastModeEnabled = result.contrastModeEnabled !== false; // Default to enabled
           this.userStrings = result.userStrings || []; // Default to empty array
+          this.siteList = result.siteList || [];
+          this.siteListMode = result.siteListMode || 'disabled';
+          
           this.updateUserPatterns();
-          if (this.isEnabled) {
+          
+          // Check if current site should be protected based on site list settings
+          const shouldProtect = this.shouldProtectCurrentSite();
+          
+          if (this.isEnabled && shouldProtect) {
             this.startRedaction();
           } else {
             // If disabled, remove processing class immediately
@@ -83,7 +90,7 @@ class NoDoxxingRedactor {
       chrome.storage.onChanged.addListener((changes, namespace) => {
         if (changes.nodoxxingEnabled) {
           this.isEnabled = changes.nodoxxingEnabled.newValue;
-          if (this.isEnabled) {
+          if (this.isEnabled && this.shouldProtectCurrentSite()) {
             // Hide page again for re-processing
             this.hidePage();
             this.startRedaction();
@@ -97,8 +104,8 @@ class NoDoxxingRedactor {
         if (changes.userStrings) {
           this.userStrings = changes.userStrings.newValue || [];
           this.updateUserPatterns();
-          // Re-process content if extension is enabled
-          if (this.isEnabled) {
+          // Re-process content if extension is enabled and should protect this site
+          if (this.isEnabled && this.shouldProtectCurrentSite()) {
             // Hide page again for re-processing
             this.hidePage();
             this.restoreOriginalContent();
@@ -109,12 +116,24 @@ class NoDoxxingRedactor {
         // Update contrast mode when it changes
         if (changes.contrastModeEnabled) {
           this.contrastModeEnabled = changes.contrastModeEnabled.newValue;
-          // Re-process content if extension is enabled
-          if (this.isEnabled) {
+          // Re-process content if extension is enabled and should protect this site
+          if (this.isEnabled && this.shouldProtectCurrentSite()) {
             this.hidePage();
             this.restoreOriginalContent();
             this.startRedaction();
           }
+        }
+        
+        // Update site list when it changes
+        if (changes.siteList) {
+          this.siteList = changes.siteList.newValue || [];
+          this.reprocessBasedOnSiteList();
+        }
+        
+        // Update site list mode when it changes
+        if (changes.siteListMode) {
+          this.siteListMode = changes.siteListMode.newValue;
+          this.reprocessBasedOnSiteList();
         }
       });
     } catch (error) {
@@ -130,6 +149,49 @@ class NoDoxxingRedactor {
       // Use word boundaries for better matching - but be careful with special chars
       return new RegExp(`\\b${escapedString}\\b`, 'gi');
     });
+  }
+  
+  getCurrentDomain() {
+    try {
+      return window.location.hostname;
+    } catch (error) {
+      console.error('NoDoxx: Error getting current domain:', error);
+      return '';
+    }
+  }
+  
+  shouldProtectCurrentSite() {
+    if (this.siteListMode === 'disabled') {
+      return true; // Protect all sites when site list is disabled
+    }
+    
+    const currentDomain = this.getCurrentDomain();
+    const siteInList = this.siteList.find(site => site.url === currentDomain && site.enabled);
+    
+    if (this.siteListMode === 'whitelist') {
+      // Only protect sites that are in the list and enabled
+      return !!siteInList;
+    } else if (this.siteListMode === 'blacklist') {
+      // Don't protect sites that are in the list and enabled
+      return !siteInList;
+    }
+    
+    return true; // Default to protecting
+  }
+  
+  reprocessBasedOnSiteList() {
+    const shouldProtect = this.shouldProtectCurrentSite();
+    
+    if (this.isEnabled && shouldProtect) {
+      // Should protect - start redaction if not already running
+      this.hidePage();
+      this.restoreOriginalContent();
+      this.startRedaction();
+    } else {
+      // Should not protect - stop redaction
+      this.restoreOriginalContent();
+      this.revealPage();
+    }
   }
 
   startRedaction() {
