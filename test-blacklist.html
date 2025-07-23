@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blacklist Test - NoDoxx Extension</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .test-section h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .instructions {
+            background-color: #f0f8ff;
+            border: 1px solid #0066cc;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .blacklisted-sites {
+            background-color: #ffe6e6;
+            border: 1px solid #cc0000;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Blacklist Test - NoDoxx Extension</h1>
+    
+    <div class="instructions">
+        <h3>Testing Instructions:</h3>
+        <ol>
+            <li>This page contains sensitive data that should normally be redacted</li>
+            <li>The extension should be disabled on blacklisted domains</li>
+            <li>To test blacklisted domains, modify your hosts file or visit the actual sites</li>
+            <li>Check browser console for blacklist messages</li>
+        </ol>
+    </div>
+    
+    <div class="blacklisted-sites">
+        <h3>⚠️ Extension should NOT operate on these domains:</h3>
+        <ul>
+            <li>chat.openai.com</li>
+            <li>claude.ai</li>
+            <li>irs.gov</li>
+            <li>ssa.gov</li>
+            <li>usa.gov</li>
+        </ul>
+    </div>
+    
+    <div class="test-section">
+        <h3>Sensitive Data for Testing</h3>
+        <p>Email: test@example.com</p>
+        <p>Phone: (555) 123-4567</p>
+        <p>Credit Card: 4532 1234 5678 9012</p>
+        <p>SSN: 123-45-6789</p>
+        <p>IP Address: 192.168.1.100</p>
+        <p>Name: John Smith</p>
+        <p>Address: 123 Main Street, Springfield</p>
+    </div>
+    
+    <div class="test-section">
+        <h3>Current Domain Test</h3>
+        <p id="currentDomain">Current domain: <span id="domain-name"></span></p>
+        <p id="blacklistStatus">Blacklist status: <span id="status-text"></span></p>
+    </div>
+    
+    <script>
+        // Display current domain and blacklist status
+        document.getElementById('domain-name').textContent = window.location.hostname;
+        
+        // Fetch the list of blacklisted domains from the extension
+        chrome.runtime.sendMessage({ action: 'getBlacklist' }, function(response) {
+            const blacklistedDomains = response.blacklistedDomains || [];
+            
+            const currentHostname = window.location.hostname.toLowerCase();
+            const isBlacklisted = blacklistedDomains.some(domain => 
+                currentHostname === domain || currentHostname.endsWith('.' + domain)
+            );
+            
+            const statusText = document.getElementById('status-text');
+            if (isBlacklisted) {
+                statusText.textContent = 'BLACKLISTED - Extension should be disabled';
+                statusText.style.color = 'red';
+                statusText.style.fontWeight = 'bold';
+            } else {
+                statusText.textContent = 'NOT BLACKLISTED - Extension should be active';
+                statusText.style.color = 'green';
+                statusText.style.fontWeight = 'bold';
+            }
+        });
+        
+        const statusText = document.getElementById('status-text');
+        if (isBlacklisted) {
+            statusText.textContent = 'BLACKLISTED - Extension should be disabled';
+            statusText.style.color = 'red';
+            statusText.style.fontWeight = 'bold';
+        } else {
+            statusText.textContent = 'NOT BLACKLISTED - Extension should be active';
+            statusText.style.color = 'green';
+            statusText.style.fontWeight = 'bold';
+        }
+    </script>
+</body>
+</html>
