@@ -235,22 +235,31 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
   
+  // Cached domain to avoid redundant API calls
+  let cachedDomain = null;
+  
   // Get current tab URL
   function getCurrentTabUrl() {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       if (tabs[0] && tabs[0].url) {
         const url = new URL(tabs[0].url);
         const domain = url.hostname;
-        currentSiteUrl.textContent = domain;
         
-        // Check if current site is already in list
-        chrome.storage.sync.get(['siteList'], (result) => {
-          const siteList = result.siteList || [];
-          const isInList = siteList.some(site => site.url === domain);
-          addCurrentSiteBtn.disabled = isInList;
-          addCurrentSiteBtn.textContent = isInList ? 'Already added' : 'Add to list';
-        });
+        // Update cached domain if it has changed
+        if (cachedDomain !== domain) {
+          cachedDomain = domain;
+          currentSiteUrl.textContent = domain;
+          
+          // Check if current site is already in list
+          chrome.storage.sync.get(['siteList'], (result) => {
+            const siteList = result.siteList || [];
+            const isInList = siteList.some(site => site.url === domain);
+            addCurrentSiteBtn.disabled = isInList;
+            addCurrentSiteBtn.textContent = isInList ? 'Already added' : 'Add to list';
+          });
+        }
       } else {
+        cachedDomain = null;
         currentSiteUrl.textContent = 'Unable to detect';
         addCurrentSiteBtn.disabled = true;
         addCurrentSiteBtn.textContent = 'Unable to add';
