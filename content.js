@@ -69,17 +69,43 @@ class RedactorRedactor {
 
     // Check if extension is enabled and load user strings and contrast mode setting
     try {
-      chrome.storage.sync.get(['nodoxxingEnabled', 'userStrings', 'contrastModeEnabled', 'siteList', 'siteListMode'], (result) => {
+      chrome.storage.sync.get(['nodoxxingEnabled', 'userStrings', 'contrastModeEnabled', 'ignoreList', 'filterList', 'protectionMode', 'siteList', 'siteListMode'], (result) => {
         try {
           this.isEnabled = result.nodoxxingEnabled !== false; // Default to enabled
           this.contrastModeEnabled = result.contrastModeEnabled !== false; // Default to enabled
           this.userStrings = result.userStrings || []; // Default to empty array
-          this.siteList = result.siteList || [];
-          this.siteListMode = result.siteListMode || 'disabled';
+          
+          // Use new format if available, otherwise fall back to old format for compatibility
+          if (result.ignoreList !== undefined || result.filterList !== undefined) {
+            this.ignoreList = result.ignoreList || [];
+            this.filterList = result.filterList || [];
+            this.protectionMode = result.protectionMode || 'all';
+          } else if (result.siteList !== undefined && result.siteListMode !== undefined) {
+            // Backward compatibility: convert old format on the fly
+            console.log('Redactor: Using backward compatibility mode for old storage format');
+            if (result.siteListMode === 'blacklist') {
+              this.ignoreList = result.siteList;
+              this.filterList = [];
+              this.protectionMode = 'all';
+            } else if (result.siteListMode === 'whitelist') {
+              this.ignoreList = [];
+              this.filterList = result.siteList;
+              this.protectionMode = 'filtered';
+            } else {
+              this.ignoreList = [];
+              this.filterList = [];
+              this.protectionMode = 'all';
+            }
+          } else {
+            // Default values
+            this.ignoreList = [];
+            this.filterList = [];
+            this.protectionMode = 'all';
+          }
           
           this.updateUserPatterns();
           
-          // Check if current site should be protected based on site list settings
+          // Check if current site should be protected based on new dual-list settings
           const shouldProtect = this.shouldProtectCurrentSite();
           this.currentProtectionActive = this.isEnabled && shouldProtect;
           
@@ -152,15 +178,21 @@ class RedactorRedactor {
           }
         }
         
-        // Update site list when it changes
-        if (changes.siteList) {
-          this.siteList = changes.siteList.newValue || [];
+        // Update ignore list when it changes
+        if (changes.ignoreList) {
+          this.ignoreList = changes.ignoreList.newValue || [];
           this.reprocessBasedOnSiteList();
         }
         
-        // Update site list mode when it changes
-        if (changes.siteListMode) {
-          this.siteListMode = changes.siteListMode.newValue;
+        // Update filter list when it changes
+        if (changes.filterList) {
+          this.filterList = changes.filterList.newValue || [];
+          this.reprocessBasedOnSiteList();
+        }
+        
+        // Update protection mode when it changes
+        if (changes.protectionMode) {
+          this.protectionMode = changes.protectionMode.newValue;
           this.reprocessBasedOnSiteList();
         }
       });
@@ -206,20 +238,26 @@ class RedactorRedactor {
   }
   
   shouldProtectCurrentSite() {
-    if (this.siteListMode === 'disabled') {
-      return true; // Protect all sites when site list is disabled
-    }
-    
     const currentDomain = this.getCurrentDomain();
     const normalizedCurrentDomain = this.normalizeDomain(currentDomain);
-    const siteInList = this.siteList.find(site => this.normalizeDomain(site.url) === normalizedCurrentDomain && site.enabled);
     
-    if (this.siteListMode === 'whitelist') {
-      // Only protect sites that are in the list and enabled
-      return !!siteInList;
-    } else if (this.siteListMode === 'blacklist') {
-      // Don't protect sites that are in the list and enabled
-      return !siteInList;
+    // Check if site is in ignore list (these sites should never be protected)
+    const siteInIgnoreList = this.ignoreList.find(site => 
+      this.normalizeDomain(site.url) === normalizedCurrentDomain && site.enabled
+    );
+    
+    if (siteInIgnoreList) {
+      return false; // Never protect sites in ignore list
+    }
+    
+    if (this.protectionMode === 'all') {
+      return true; // Protect all sites (except those in ignore list)
+    } else if (this.protectionMode === 'filtered') {
+      // Only protect sites that are in the filter list and enabled
+      const siteInFilterList = this.filterList.find(site => 
+        this.normalizeDomain(site.url) === normalizedCurrentDomain && site.enabled
+      );
+      return !!siteInFilterList;
     }
     
     return true; // Default to protecting
