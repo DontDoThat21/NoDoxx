@@ -5,8 +5,9 @@ chrome.runtime.onInstalled.addListener(() => {
   chrome.storage.sync.set({
     nodoxxingEnabled: true,
     contrastModeEnabled: true,
-    siteList: [],
-    siteListMode: 'disabled' // 'disabled', 'whitelist', 'blacklist'
+    ignoreList: [],
+    filterList: [],
+    protectionMode: 'all' // 'all' or 'filtered'
   });
 });
 

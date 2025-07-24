@@ -229,12 +229,12 @@ input:checked + .slider:before {
 
 .input-container {
   display: flex;
+  flex-direction: column;
   gap: 8px;
   margin-bottom: 15px;
 }
 
 .input-container input {
-  flex: 1;
   padding: 8px 12px;
   background: #333;
   border: 1px solid #555;
@@ -252,22 +252,40 @@ input:checked + .slider:before {
   border-color: #4CAF50;
 }
 
-.input-container button {
+.input-container button,
+.add-buttons button {
   padding: 8px 16px;
-  background: #4CAF50;
   border: none;
   border-radius: 4px;
   color: white;
   font-size: 14px;
   cursor: pointer;
   transition: background-color 0.3s;
+  flex: 1;
 }
 
-.input-container button:hover {
+.input-container button.ignore-btn,
+.add-buttons button.ignore-btn {
+  background: #f44336;
+}
+
+.input-container button.ignore-btn:hover,
+.add-buttons button.ignore-btn:hover {
+  background: #d32f2f;
+}
+
+.input-container button.filter-btn,
+.add-buttons button.filter-btn {
+  background: #4CAF50;
+}
+
+.input-container button.filter-btn:hover,
+.add-buttons button.filter-btn:hover {
   background: #45a049;
 }
 
-.input-container button:disabled {
+.input-container button:disabled,
+.add-buttons button:disabled {
   background: #666;
   cursor: not-allowed;
 }
@@ -367,7 +385,8 @@ input:checked + .slider:before {
 
 .current-site-section,
 .add-site-section,
-.site-list-section {
+.ignore-list-section,
+.filter-list-section {
   margin-bottom: 20px;
   border-top: 1px solid #444;
   padding-top: 15px;
@@ -375,7 +394,8 @@ input:checked + .slider:before {
 
 .current-site-section h3,
 .add-site-section h3,
-.site-list-section h3 {
+.ignore-list-section h3,
+.filter-list-section h3 {
   margin: 0 0 10px 0;
   font-size: 14px;
   color: #ddd;
@@ -383,8 +403,8 @@ input:checked + .slider:before {
 
 .current-site-info {
   display: flex;
-  align-items: center;
-  gap: 10px;
+  flex-direction: column;
+  gap: 8px;
   padding: 8px;
   background: #333;
   border: 1px solid #555;
@@ -392,7 +412,6 @@ input:checked + .slider:before {
 }
 
 .current-site-info span {
-  flex: 1;
   font-size: 12px;
   color: #ccc;
   overflow: hidden;
@@ -400,18 +419,47 @@ input:checked + .slider:before {
   white-space: nowrap;
 }
 
+.current-site-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.add-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.list-description {
+  font-size: 11px;
+  color: #aaa;
+  margin: 0 0 10px 0;
+  font-style: italic;
+}
+
 .add-site-btn {
   padding: 6px 12px;
-  background: #4CAF50;
   border: none;
   border-radius: 3px;
   color: white;
   font-size: 11px;
   cursor: pointer;
   transition: background-color 0.3s;
+  flex: 1;
 }
 
-.add-site-btn:hover {
+.add-site-btn.ignore-btn {
+  background: #f44336;
+}
+
+.add-site-btn.ignore-btn:hover {
+  background: #d32f2f;
+}
+
+.add-site-btn.filter-btn {
+  background: #4CAF50;
+}
+
+.add-site-btn.filter-btn:hover {
   background: #45a049;
 }
 

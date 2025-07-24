@@ -80,16 +80,12 @@
           <h3>Protection Mode</h3>
           <div class="mode-options">
             <label class="mode-option">
-              <input type="radio" name="siteMode" value="disabled" checked>
+              <input type="radio" name="protectionMode" value="all" checked>
               <span>Protect all sites</span>
             </label>
             <label class="mode-option">
-              <input type="radio" name="siteMode" value="whitelist">
-              <span>Protect only listed sites</span>
-            </label>
-            <label class="mode-option">
-              <input type="radio" name="siteMode" value="blacklist">
-              <span>Don't protect listed sites</span>
+              <input type="radio" name="protectionMode" value="filtered">
+              <span>Use filter and ignore lists</span>
             </label>
           </div>
         </div>
@@ -98,7 +94,10 @@
           <h3>Current Site</h3>
           <div class="current-site-info">
             <span id="currentSiteUrl">Loading...</span>
-            <button id="addCurrentSiteBtn" class="add-site-btn">Add to list</button>
+            <div class="current-site-buttons">
+              <button id="addToIgnoreBtn" class="add-site-btn ignore-btn">Add to Ignore</button>
+              <button id="addToFilterBtn" class="add-site-btn filter-btn">Add to Filter</button>
+            </div>
           </div>
         </div>
         
@@ -106,13 +105,23 @@
           <h3>Add Site Manually</h3>
           <div class="input-container">
             <input type="text" id="newSiteInput" placeholder="Enter website URL...">
-            <button id="addSiteBtn">Add</button>
+            <div class="add-buttons">
+              <button id="addToIgnoreManualBtn" class="ignore-btn">Add to Ignore</button>
+              <button id="addToFilterManualBtn" class="filter-btn">Add to Filter</button>
+            </div>
           </div>
         </div>
         
-        <div class="site-list-section">
-          <h3>Sites List</h3>
-          <ul id="sitesList" class="sites-list"></ul>
+        <div class="ignore-list-section">
+          <h3>🚫 Ignore List</h3>
+          <p class="list-description">Sites where DOM is never manipulated</p>
+          <ul id="ignoreList" class="sites-list"></ul>
+        </div>
+        
+        <div class="filter-list-section">
+          <h3>✅ Filter List</h3>
+          <p class="list-description">Sites where DOM can be modified based on settings</p>
+          <ul id="filterList" class="sites-list"></ul>
         </div>
       </div>
     </div>

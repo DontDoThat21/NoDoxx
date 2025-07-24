@@ -18,12 +18,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const tabContents = document.querySelectorAll('.tab-content');
   
   // Site list elements
-  const siteModeRadios = document.querySelectorAll('input[name="siteMode"]');
+  const protectionModeRadios = document.querySelectorAll('input[name="protectionMode"]');
   const currentSiteUrl = document.getElementById('currentSiteUrl');
-  const addCurrentSiteBtn = document.getElementById('addCurrentSiteBtn');
+  const addToIgnoreBtn = document.getElementById('addToIgnoreBtn');
+  const addToFilterBtn = document.getElementById('addToFilterBtn');
   const newSiteInput = document.getElementById('newSiteInput');
-  const addSiteBtn = document.getElementById('addSiteBtn');
-  const sitesList = document.getElementById('sitesList');
+  const addToIgnoreManualBtn = document.getElementById('addToIgnoreManualBtn');
+  const addToFilterManualBtn = document.getElementById('addToFilterManualBtn');
+  const ignoreList = document.getElementById('ignoreList');
+  const filterList = document.getElementById('filterList');
 
   // Initialize tabs
   initTabs();
@@ -32,25 +35,27 @@ document.addEventListener('DOMContentLoaded', () => {
   getCurrentTabUrl();
 
   // Load current state
-  chrome.storage.sync.get(['nodoxxingEnabled', 'userStrings', 'contrastModeEnabled', 'siteList', 'siteListMode'], (result) => {
+  chrome.storage.sync.get(['nodoxxingEnabled', 'userStrings', 'contrastModeEnabled', 'ignoreList', 'filterList', 'protectionMode'], (result) => {
     const isEnabled = result.nodoxxingEnabled !== false; // Default to enabled
     const contrastModeEnabled = result.contrastModeEnabled !== false; // Default to enabled
     const userStrings = result.userStrings || [];
-    const siteList = result.siteList || [];
-    const siteListMode = result.siteListMode || 'disabled';
+    const ignoreListData = result.ignoreList || [];
+    const filterListData = result.filterList || [];
+    const protectionMode = result.protectionMode || 'all';
     
     toggle.checked = isEnabled;
     contrastToggle.checked = contrastModeEnabled;
     updateStatus(isEnabled);
     renderUserStrings(userStrings);
     
-    // Set site mode
-    const siteModeRadio = document.querySelector(`input[name="siteMode"][value="${siteListMode}"]`);
-    if (siteModeRadio) {
-      siteModeRadio.checked = true;
+    // Set protection mode
+    const protectionModeRadio = document.querySelector(`input[name="protectionMode"][value="${protectionMode}"]`);
+    if (protectionModeRadio) {
+      protectionModeRadio.checked = true;
     }
     
-    renderSitesList(siteList);
+    renderIgnoreList(ignoreListData);
+    renderFilterList(filterListData);
   });
 
   // Handle toggle change
@@ -81,16 +86,19 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   
   // Site list event handlers
-  siteModeRadios.forEach(radio => {
-    radio.addEventListener('change', handleSiteModeChange);
+  protectionModeRadios.forEach(radio => {
+    radio.addEventListener('change', handleProtectionModeChange);
   });
   
-  addCurrentSiteBtn.addEventListener('click', addCurrentSite);
-  addSiteBtn.addEventListener('click', addSiteManually);
+  addToIgnoreBtn.addEventListener('click', () => addCurrentSiteToList('ignore'));
+  addToFilterBtn.addEventListener('click', () => addCurrentSiteToList('filter'));
+  addToIgnoreManualBtn.addEventListener('click', () => addSiteManually('ignore'));
+  addToFilterManualBtn.addEventListener('click', () => addSiteManually('filter'));
   
   newSiteInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
-      addSiteManually();
+      // Default to adding to ignore list on Enter
+      addSiteManually('ignore');
     }
   });
 
@@ -112,18 +120,25 @@ document.addEventListener('DOMContentLoaded', () => {
       renderUserStrings(userStrings);
     }
     
-    if (changes.siteList) {
-      const siteList = changes.siteList.newValue || [];
-      renderSitesList(siteList);
-      // Update current site button
+    if (changes.ignoreList) {
+      const ignoreListData = changes.ignoreList.newValue || [];
+      renderIgnoreList(ignoreListData);
+      // Update current site buttons
       getCurrentTabUrl();
     }
     
-    if (changes.siteListMode) {
-      const siteListMode = changes.siteListMode.newValue;
-      const siteModeRadio = document.querySelector(`input[name="siteMode"][value="${siteListMode}"]`);
-      if (siteModeRadio) {
-        siteModeRadio.checked = true;
+    if (changes.filterList) {
+      const filterListData = changes.filterList.newValue || [];
+      renderFilterList(filterListData);
+      // Update current site buttons
+      getCurrentTabUrl();
+    }
+    
+    if (changes.protectionMode) {
+      const protectionMode = changes.protectionMode.newValue;
+      const protectionModeRadio = document.querySelector(`input[name="protectionMode"][value="${protectionMode}"]`);
+      if (protectionModeRadio) {
+        protectionModeRadio.checked = true;
       }
     }
   });
@@ -250,40 +265,48 @@ document.addEventListener('DOMContentLoaded', () => {
           cachedDomain = domain;
           currentSiteUrl.textContent = domain;
           
-          // Check if current site is already in list
-          chrome.storage.sync.get(['siteList'], (result) => {
-            const siteList = result.siteList || [];
-            const isInList = siteList.some(site => site.url === domain);
-            addCurrentSiteBtn.disabled = isInList;
-            addCurrentSiteBtn.textContent = isInList ? 'Already added' : 'Add to list';
+          // Check if current site is already in either list
+          chrome.storage.sync.get(['ignoreList', 'filterList'], (result) => {
+            const ignoreListData = result.ignoreList || [];
+            const filterListData = result.filterList || [];
+            const isInIgnoreList = ignoreListData.some(site => site.url === domain);
+            const isInFilterList = filterListData.some(site => site.url === domain);
+            
+            addToIgnoreBtn.disabled = isInIgnoreList;
+            addToIgnoreBtn.textContent = isInIgnoreList ? 'In Ignore List' : 'Add to Ignore';
+            
+            addToFilterBtn.disabled = isInFilterList;
+            addToFilterBtn.textContent = isInFilterList ? 'In Filter List' : 'Add to Filter';
           });
         }
       } else {
         cachedDomain = null;
         currentSiteUrl.textContent = 'Unable to detect';
-        addCurrentSiteBtn.disabled = true;
-        addCurrentSiteBtn.textContent = 'Unable to add';
+        addToIgnoreBtn.disabled = true;
+        addToIgnoreBtn.textContent = 'Unable to add';
+        addToFilterBtn.disabled = true;
+        addToFilterBtn.textContent = 'Unable to add';
       }
     });
   }
   
   // Site list functions
-  function handleSiteModeChange() {
-    const selectedMode = document.querySelector('input[name="siteMode"]:checked').value;
-    chrome.storage.sync.set({ siteListMode: selectedMode });
+  function handleProtectionModeChange() {
+    const selectedMode = document.querySelector('input[name="protectionMode"]:checked').value;
+    chrome.storage.sync.set({ protectionMode: selectedMode });
   }
   
-  function addCurrentSite() {
+  function addCurrentSiteToList(listType) {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       if (tabs[0] && tabs[0].url) {
         const url = new URL(tabs[0].url);
         const domain = url.hostname;
-        addSiteToList(domain);
+        addSiteToList(domain, listType);
       }
     });
   }
   
-  function addSiteManually() {
+  function addSiteManually(listType) {
     const siteUrl = newSiteInput.value.trim();
     if (!siteUrl) return;
     
@@ -302,73 +325,92 @@ document.addEventListener('DOMContentLoaded', () => {
       domain = siteUrl;
     }
     
-    addSiteToList(domain);
+    addSiteToList(domain, listType);
     newSiteInput.value = '';
   }
   
-  function addSiteToList(domain) {
-    chrome.storage.sync.get(['siteList'], (result) => {
-      const siteList = result.siteList || [];
+  function addSiteToList(domain, listType) {
+    const storageKey = listType === 'ignore' ? 'ignoreList' : 'filterList';
+    const otherStorageKey = listType === 'ignore' ? 'filterList' : 'ignoreList';
+    
+    chrome.storage.sync.get([storageKey, otherStorageKey], (result) => {
+      const currentList = result[storageKey] || [];
+      const otherList = result[otherStorageKey] || [];
       
-      // Check if site already exists
-      if (siteList.some(site => site.url === domain)) {
-        showNotification('This site is already in the list.', 'error');
+      // Check if site already exists in current list
+      if (currentList.some(site => site.url === domain)) {
+        showNotification(`This site is already in the ${listType} list.`, 'error');
         return;
       }
       
-      // Add new site
+      // Remove from other list if it exists there
+      const updatedOtherList = otherList.filter(site => site.url !== domain);
+      
+      // Add new site to current list
       const newSite = {
         url: domain,
         enabled: true,
         addedAt: Date.now()
       };
       
-      siteList.push(newSite);
-      chrome.storage.sync.set({ siteList });
+      currentList.push(newSite);
       
-      // Update current site button if this was the current site
+      // Update storage
+      const updateData = {};
+      updateData[storageKey] = currentList;
+      updateData[otherStorageKey] = updatedOtherList;
+      
+      chrome.storage.sync.set(updateData);
+      
+      // Update current site buttons if this was the current site
       getCurrentTabUrl();
     });
   }
   
-  function removeSiteFromList(domain) {
-    chrome.storage.sync.get(['siteList'], (result) => {
-      const siteList = result.siteList || [];
-      const updatedSites = siteList.filter(site => site.url !== domain);
-      chrome.storage.sync.set({ siteList: updatedSites });
+  function removeSiteFromList(domain, listType) {
+    const storageKey = listType === 'ignore' ? 'ignoreList' : 'filterList';
+    chrome.storage.sync.get([storageKey], (result) => {
+      const currentList = result[storageKey] || [];
+      const updatedList = currentList.filter(site => site.url !== domain);
+      const updateData = {};
+      updateData[storageKey] = updatedList;
+      chrome.storage.sync.set(updateData);
       
-      // Update current site button if this was the current site
+      // Update current site buttons if this was the current site
       getCurrentTabUrl();
     });
   }
   
-  function toggleSiteEnabled(domain, enabled) {
-    chrome.storage.sync.get(['siteList'], (result) => {
-      const siteList = result.siteList || [];
-      const site = siteList.find(site => site.url === domain);
+  function toggleSiteEnabled(domain, enabled, listType) {
+    const storageKey = listType === 'ignore' ? 'ignoreList' : 'filterList';
+    chrome.storage.sync.get([storageKey], (result) => {
+      const currentList = result[storageKey] || [];
+      const site = currentList.find(site => site.url === domain);
       if (site) {
         site.enabled = enabled;
-        chrome.storage.sync.set({ siteList });
+        const updateData = {};
+        updateData[storageKey] = currentList;
+        chrome.storage.sync.set(updateData);
       }
     });
   }
   
-  function renderSitesList(siteList) {
-    sitesList.innerHTML = '';
+  function renderIgnoreList(ignoreListData) {
+    ignoreList.innerHTML = '';
     
-    if (siteList.length === 0) {
+    if (ignoreListData.length === 0) {
       const emptyItem = document.createElement('li');
       const emptyText = document.createElement('span');
       emptyText.className = 'site-url';
       emptyText.style.fontStyle = 'italic';
       emptyText.style.color = '#888';
-      emptyText.textContent = 'No sites added';
+      emptyText.textContent = 'No sites in ignore list';
       emptyItem.appendChild(emptyText);
-      sitesList.appendChild(emptyItem);
+      ignoreList.appendChild(emptyItem);
       return;
     }
     
-    siteList.forEach(site => {
+    ignoreListData.forEach(site => {
       const listItem = document.createElement('li');
       
       const siteUrl = document.createElement('span');
@@ -384,7 +426,7 @@ document.addEventListener('DOMContentLoaded', () => {
       toggleCheckbox.type = 'checkbox';
       toggleCheckbox.checked = site.enabled;
       toggleCheckbox.addEventListener('change', () => {
-        toggleSiteEnabled(site.url, toggleCheckbox.checked);
+        toggleSiteEnabled(site.url, toggleCheckbox.checked, 'ignore');
       });
       toggleContainer.appendChild(toggleCheckbox);
       listItem.appendChild(toggleContainer);
@@ -393,11 +435,65 @@ document.addEventListener('DOMContentLoaded', () => {
       removeBtn.className = 'remove-btn';
       removeBtn.textContent = 'Remove';
       removeBtn.addEventListener('click', () => {
-        removeSiteFromList(site.url);
+        removeSiteFromList(site.url, 'ignore');
       });
       listItem.appendChild(removeBtn);
       
-      sitesList.appendChild(listItem);
+      ignoreList.appendChild(listItem);
     });
+  }
+  
+  function renderFilterList(filterListData) {
+    filterList.innerHTML = '';
+    
+    if (filterListData.length === 0) {
+      const emptyItem = document.createElement('li');
+      const emptyText = document.createElement('span');
+      emptyText.className = 'site-url';
+      emptyText.style.fontStyle = 'italic';
+      emptyText.style.color = '#888';
+      emptyText.textContent = 'No sites in filter list';
+      emptyItem.appendChild(emptyText);
+      filterList.appendChild(emptyItem);
+      return;
+    }
+    
+    filterListData.forEach(site => {
+      const listItem = document.createElement('li');
+      
+      const siteUrl = document.createElement('span');
+      siteUrl.className = 'site-url';
+      siteUrl.title = site.url;
+      siteUrl.textContent = site.url;
+      listItem.appendChild(siteUrl);
+      
+      const toggleContainer = document.createElement('div');
+      toggleContainer.className = 'site-toggle';
+      
+      const toggleCheckbox = document.createElement('input');
+      toggleCheckbox.type = 'checkbox';
+      toggleCheckbox.checked = site.enabled;
+      toggleCheckbox.addEventListener('change', () => {
+        toggleSiteEnabled(site.url, toggleCheckbox.checked, 'filter');
+      });
+      toggleContainer.appendChild(toggleCheckbox);
+      listItem.appendChild(toggleContainer);
+      
+      const removeBtn = document.createElement('button');
+      removeBtn.className = 'remove-btn';
+      removeBtn.textContent = 'Remove';
+      removeBtn.addEventListener('click', () => {
+        removeSiteFromList(site.url, 'filter');
+      });
+      listItem.appendChild(removeBtn);
+      
+      filterList.appendChild(listItem);
+    });
+  }
+  
+  // Simple notification function
+  function showNotification(message, type = 'info') {
+    // For now, just use alert - could be enhanced with toast notifications
+    alert(message);
   }
 });
