@@ -69,14 +69,39 @@ class RedactorRedactor {
 
     // Check if extension is enabled and load user strings and contrast mode setting
     try {
-      chrome.storage.sync.get(['nodoxxingEnabled', 'userStrings', 'contrastModeEnabled', 'ignoreList', 'filterList', 'protectionMode'], (result) => {
+      chrome.storage.sync.get(['nodoxxingEnabled', 'userStrings', 'contrastModeEnabled', 'ignoreList', 'filterList', 'protectionMode', 'siteList', 'siteListMode'], (result) => {
         try {
           this.isEnabled = result.nodoxxingEnabled !== false; // Default to enabled
           this.contrastModeEnabled = result.contrastModeEnabled !== false; // Default to enabled
           this.userStrings = result.userStrings || []; // Default to empty array
-          this.ignoreList = result.ignoreList || [];
-          this.filterList = result.filterList || [];
-          this.protectionMode = result.protectionMode || 'all';
+          
+          // Use new format if available, otherwise fall back to old format for compatibility
+          if (result.ignoreList !== undefined || result.filterList !== undefined) {
+            this.ignoreList = result.ignoreList || [];
+            this.filterList = result.filterList || [];
+            this.protectionMode = result.protectionMode || 'all';
+          } else if (result.siteList !== undefined && result.siteListMode !== undefined) {
+            // Backward compatibility: convert old format on the fly
+            console.log('Redactor: Using backward compatibility mode for old storage format');
+            if (result.siteListMode === 'blacklist') {
+              this.ignoreList = result.siteList;
+              this.filterList = [];
+              this.protectionMode = 'all';
+            } else if (result.siteListMode === 'whitelist') {
+              this.ignoreList = [];
+              this.filterList = result.siteList;
+              this.protectionMode = 'filtered';
+            } else {
+              this.ignoreList = [];
+              this.filterList = [];
+              this.protectionMode = 'all';
+            }
+          } else {
+            // Default values
+            this.ignoreList = [];
+            this.filterList = [];
+            this.protectionMode = 'all';
+          }
           
           this.updateUserPatterns();
           
