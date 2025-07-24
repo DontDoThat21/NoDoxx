@@ -332,6 +332,18 @@ class RedactorRedactor {
     this.processElementTextNodes(document.body);
   }
 
+  isWithinHeading(textNode) {
+    // Check if text node is within a heading element (h1-h6)
+    let currentElement = textNode.parentElement;
+    while (currentElement && currentElement !== document.body) {
+      if (/^H[1-6]$/i.test(currentElement.tagName)) {
+        return true;
+      }
+      currentElement = currentElement.parentElement;
+    }
+    return false;
+  }
+
   processTextNode(textNode) {
     // Skip if already processed or if parent is redacted
     if (!textNode || !textNode.parentElement || 
@@ -343,9 +355,15 @@ class RedactorRedactor {
     let content = textNode.textContent;
     let hasRedactions = false;
     let originalContent = content;
+    const isInHeading = this.isWithinHeading(textNode);
 
-    // Apply all redaction patterns
+    // Apply all redaction patterns, but skip sensitive keyword patterns in headings
     for (const [patternName, pattern] of Object.entries(this.patterns)) {
+      // Skip name pattern in headings as it might redact legitimate title words
+      if (isInHeading && patternName === 'names') {
+        continue;
+      }
+      
       if (pattern.test(content)) {
         hasRedactions = true;
         content = content.replace(pattern, (match) => {
@@ -354,8 +372,8 @@ class RedactorRedactor {
       }
     }
 
-    // Apply user-defined string redactions
-    if (this.userPatterns.length > 0) {
+    // Apply user-defined string redactions (but be less aggressive in headings)
+    if (this.userPatterns.length > 0 && !isInHeading) {
       for (const userPattern of this.userPatterns) {
         if (userPattern.test(content)) {
           hasRedactions = true;
@@ -364,8 +382,8 @@ class RedactorRedactor {
       }
     }
 
-    // Check for sensitive keywords in context
-    if (this.hasSensitiveContext(originalContent)) {
+    // Skip sensitive context checking in headings to prevent redacting words like "login", "password" in titles
+    if (!isInHeading && this.hasSensitiveContext(originalContent)) {
       // Be more aggressive with redaction in sensitive contexts
       const emailPattern = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g;
       if (emailPattern.test(content)) {
