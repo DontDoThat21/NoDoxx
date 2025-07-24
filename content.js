@@ -4,6 +4,7 @@ class RedactorRedactor {
   constructor() {
     this.isEnabled = true;
     this.contrastModeEnabled = true; // Default enabled as per requirement
+    this.currentProtectionActive = false; // Track current protection state
     this.patterns = {
       // Email addresses
       email: /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g,
@@ -80,8 +81,9 @@ class RedactorRedactor {
           
           // Check if current site should be protected based on site list settings
           const shouldProtect = this.shouldProtectCurrentSite();
+          this.currentProtectionActive = this.isEnabled && shouldProtect;
           
-          if (this.isEnabled && shouldProtect) {
+          if (this.currentProtectionActive) {
             this.startRedaction();
           } else {
             // If disabled, remove processing class immediately
@@ -113,9 +115,14 @@ class RedactorRedactor {
       chrome.storage.onChanged.addListener((changes, namespace) => {
         if (changes.nodoxxingEnabled) {
           this.isEnabled = changes.nodoxxingEnabled.newValue;
-          if (this.isEnabled && this.shouldProtectCurrentSite()) {
-            // Hide page again for re-processing
-            this.hidePage();
+          const shouldProtect = this.shouldProtectCurrentSite();
+          const newProtectionState = this.isEnabled && shouldProtect;
+          
+          // Update current protection state and apply changes
+          this.currentProtectionActive = newProtectionState;
+          
+          if (newProtectionState) {
+            // Start redaction
             this.startRedaction();
           } else {
             this.restoreOriginalContent();
@@ -127,10 +134,9 @@ class RedactorRedactor {
         if (changes.userStrings) {
           this.userStrings = changes.userStrings.newValue || [];
           this.updateUserPatterns();
-          // Re-process content if extension is enabled and should protect this site
-          if (this.isEnabled && this.shouldProtectCurrentSite()) {
-            // Hide page again for re-processing
-            this.hidePage();
+          // Re-process content only if protection is currently active
+          if (this.currentProtectionActive) {
+            // Re-process for new user strings
             this.restoreOriginalContent();
             this.startRedaction();
           }
@@ -139,9 +145,8 @@ class RedactorRedactor {
         // Update contrast mode when it changes
         if (changes.contrastModeEnabled) {
           this.contrastModeEnabled = changes.contrastModeEnabled.newValue;
-          // Re-process content if extension is enabled and should protect this site
-          if (this.isEnabled && this.shouldProtectCurrentSite()) {
-            this.hidePage();
+          // Re-process content only if protection is currently active
+          if (this.currentProtectionActive) {
             this.restoreOriginalContent();
             this.startRedaction();
           }
@@ -222,14 +227,23 @@ class RedactorRedactor {
   
   reprocessBasedOnSiteList() {
     const shouldProtect = this.shouldProtectCurrentSite();
+    const newProtectionState = this.isEnabled && shouldProtect;
     
-    if (this.isEnabled && shouldProtect) {
-      // Should protect - start redaction if not already running
-      this.hidePage();
+    // Check if protection state is actually changing
+    if (newProtectionState === this.currentProtectionActive) {
+      // Protection state hasn't changed, no need to reprocess
+      return;
+    }
+    
+    // Update current protection state
+    this.currentProtectionActive = newProtectionState;
+    
+    if (newProtectionState) {
+      // Should protect - start redaction
       this.restoreOriginalContent();
       this.startRedaction();
     } else {
-      // Should not protect - stop redaction
+      // Should not protect - stop redaction immediately
       this.restoreOriginalContent();
       this.revealPage();
     }
