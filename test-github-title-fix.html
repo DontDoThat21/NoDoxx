@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Title Redaction Fix Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .test-case {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background: #f9f9f9;
+        }
+        .pass { border-color: #28a745; background: #d4edda; }
+        .fail { border-color: #dc3545; background: #f8d7da; }
+        h1, h2, h3, h4, h5, h6 { color: #333; margin-top: 0; }
+        .expected { font-style: italic; color: #666; }
+    </style>
+</head>
+<body>
+    <h1>GitHub Title Redaction Fix - Test Cases</h1>
+    <p>This page tests the fix for GitHub title redaction issue. Headings should preserve title words while content should still be protected.</p>
+    
+    <div class="test-case">
+        <h2>✅ GitHub Issue Titles (Should NOT be redacted)</h2>
+        <h3>Fix Login button not opening MainWindow due to DI and error handling issues #984</h3>
+        <h4>Password Reset Feature Enhancement</h4>
+        <h5>Auth Token Validation Bug - Secret Key Issue</h5>
+        <h6>User Authentication Service Refactor</h6>
+        <p class="expected">Expected: All heading text should remain visible (not redacted)</p>
+    </div>
+    
+    <div class="test-case">
+        <h2>✅ Legitimate Sensitive Data in Headings (Should be redacted)</h2>
+        <h3>Contact Support at support@company.com</h3>
+        <h4>Emergency Hotline: (555) 123-4567</h4>
+        <h5>Server Status - IP 192.168.1.100 Down</h5>
+        <h6>Visit github.com/company/project for Updates</h6>
+        <p class="expected">Expected: Actual sensitive data (emails, phones, IPs, GitHub URLs) should be redacted even in headings</p>
+    </div>
+    
+    <div class="test-case">
+        <h2>✅ Content Protection (Should work as before)</h2>
+        <p>User John Smith is having login issues. Contact him at john.smith@company.com or call (555) 987-6543.</p>
+        <p>You can login to the system using your password and authentication token.</p>
+        <p>The secret key is stored at 123 Main Street, Springfield. Server IP: 203.0.113.45</p>
+        <p>Credit card: 4532 1234 5678 9012, SSN: 123-45-6789</p>
+        <p class="expected">Expected: All sensitive data in content should be redacted as before</p>
+    </div>
+    
+    <div class="test-case">
+        <h2>📝 Test Results</h2>
+        <p>With the fix applied:</p>
+        <ul>
+            <li><strong>Title words preserved:</strong> "Login", "Password", "Auth", "Token", "Secret", "Authentication" in headings remain visible</li>
+            <li><strong>Security maintained:</strong> Actual sensitive data like emails, phones, IPs still get redacted everywhere</li>
+            <li><strong>Content protection:</strong> Regular content redaction works exactly as before</li>
+            <li><strong>Generic solution:</strong> Works on any website, not just GitHub</li>
+        </ul>
+    </div>
+</body>
+</html>

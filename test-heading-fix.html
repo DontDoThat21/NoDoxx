@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Heading Redaction Fix</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        h1, h2, h3 { color: #333; }
+    </style>
+</head>
+<body>
+    <h1>Fix Login button not opening MainWindow due to DI and error handling issues #984</h1>
+    <h2>Password Reset Feature Enhancement</h2>
+    <h3>Auth Token Validation Bug - Secret Key Issue</h3>
+    
+    <div class="test-section">
+        <h4>Personal Information in Heading</h4>
+        <p>In this paragraph, you can login with your password. Contact john.doe@example.com for assistance.</p>
+        <p>The authentication token needs to be refreshed using the secret key.</p>
+        <p>Phone: (555) 123-4567, Email: support@company.com</p>
+    </div>
+    
+    <div class="test-section">
+        <h5>User John Smith Login Issues</h5>
+        <p>John Smith is having trouble with login. His email is john.smith@company.com and phone is 555-987-6543.</p>
+    </div>
+    
+    <div class="test-section">
+        <h6>Token Authentication Service</h6>
+        <p>The token service authenticates users. For issues, contact auth-support@service.org</p>
+    </div>
+</body>
+</html>
