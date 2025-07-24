@@ -97,8 +97,13 @@ document.addEventListener('DOMContentLoaded', () => {
   
   newSiteInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
-      // Default to adding to ignore list on Enter
-      addSiteManually('ignore');
+      // Prompt user to select the list when pressing Enter
+      const userChoice = window.confirm("Press OK to add to 'ignore' list or Cancel to add to 'filter' list.");
+      if (userChoice) {
+        addSiteManually('ignore');
+      } else {
+        addSiteManually('filter');
+      }
     }
   });
 
