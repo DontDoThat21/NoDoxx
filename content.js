@@ -62,7 +62,6 @@ class RedactorRedactor {
     // Check if extension is enabled and load user strings, contrast mode setting, and site list
     // Check if current domain is blacklisted
     if (this.isBlacklistedDomain()) {
-      console.log('NoDoxx: Extension disabled on blacklisted domain:', window.location.hostname);
       this.revealPage();
       return;
     }
@@ -82,7 +81,6 @@ class RedactorRedactor {
             this.protectionMode = result.protectionMode || 'all';
           } else if (result.siteList !== undefined && result.siteListMode !== undefined) {
             // Backward compatibility: convert old format on the fly
-            console.log('Redactor: Using backward compatibility mode for old storage format');
             if (result.siteListMode === 'blacklist') {
               this.ignoreList = result.siteList;
               this.filterList = [];
