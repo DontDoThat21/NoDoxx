@@ -20,8 +20,14 @@ class RedactorRedactor {
       // IP addresses
       ip: /\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b/g,
       
-      // GitHub usernames (when preceded by @ or github.com/)
-      github: /(github\.com\/|@)([a-zA-Z0-9]([a-zA-Z0-9\-]){0,38})/g,
+      // GitHub URLs (github.com/username)
+      github: /github\.com\/[a-zA-Z0-9][a-zA-Z0-9\-_]{0,38}/g,
+      
+      // GitHub mentions with explicit context
+      githubMention: /@[a-zA-Z0-9][a-zA-Z0-9\-_]{0,38}\s+on\s+GitHub/gi,
+      githubUser: /GitHub\s+user\s+@[a-zA-Z0-9][a-zA-Z0-9\-_]{0,38}/gi,
+      githubFollow: /Follow\s+@[a-zA-Z0-9][a-zA-Z0-9\-_]{0,38}\s+on\s+GitHub/gi,
+      githubContext: /@[a-zA-Z0-9][a-zA-Z0-9\-_]{0,38}(?=\s+on\s+GitHub)/gi,
       
       // Addresses (basic street address pattern) - put before names to avoid conflict
       address: /\b\d+\s+[A-Za-z0-9\s]+\s+(Street|St|Avenue|Ave|Road|Rd|Lane|Ln|Drive|Dr|Court|Ct|Boulevard|Blvd)\b/gi,

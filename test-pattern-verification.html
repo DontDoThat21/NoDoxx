@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redaction Pattern Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .test-case {
+            margin: 10px 0;
+            padding: 10px;
+            border-left: 4px solid #ccc;
+        }
+        .should-not-redact {
+            background-color: #e8f5e8;
+            border-left-color: #4caf50;
+        }
+        .should-redact {
+            background-color: #ffebee;
+            border-left-color: #f44336;
+        }
+        .test-result {
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        .pass { color: #4caf50; }
+        .fail { color: #f44336; }
+        .redactor-redacted {
+            background-color: #000;
+            color: #fff;
+            padding: 2px 4px;
+            border-radius: 2px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Redaction Pattern Test</h1>
+    <p>Testing the new GitHub username patterns to ensure "@copilot" and similar references are not incorrectly redacted.</p>
+    
+    <div id="results"></div>
+    
+    <script>
+        // Simulate the redaction patterns from content.js
+        const patterns = {
+            // Email addresses
+            email: /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g,
+            
+            // Phone numbers (various formats)
+            phone: /(\+?1[-.\s]?)?\(?([0-9]{3})\)?[-.\s]?([0-9]{3})[-.\s]?([0-9]{4})\b/g,
+            
+            // Credit card numbers (basic pattern)
+            creditCard: /\b(?:\d{4}[-\s]?){3}\d{4}\b/g,
+            
+            // SSN (XXX-XX-XXXX format)
+            ssn: /\b\d{3}-\d{2}-\d{4}\b/g,
+            
+            // IP addresses
+            ip: /\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b/g,
+            
+            // GitHub URLs (github.com/username)
+            github: /github\.com\/[a-zA-Z0-9][a-zA-Z0-9\-_]{0,38}/g,
+            
+            // GitHub mentions with explicit context
+            githubMention: /@[a-zA-Z0-9][a-zA-Z0-9\-_]{0,38}\s+on\s+GitHub/gi,
+            githubUser: /GitHub\s+user\s+@[a-zA-Z0-9][a-zA-Z0-9\-_]{0,38}/gi,
+            githubFollow: /Follow\s+@[a-zA-Z0-9][a-zA-Z0-9\-_]{0,38}\s+on\s+GitHub/gi,
+            githubContext: /@[a-zA-Z0-9][a-zA-Z0-9\-_]{0,38}(?=\s+on\s+GitHub)/gi,
+            
+            // Addresses (basic street address pattern) - put before names to avoid conflict
+            address: /\b\d+\s+[A-Za-z0-9\s]+\s+(Street|St|Avenue|Ave|Road|Rd|Lane|Ln|Drive|Dr|Court|Ct|Boulevard|Blvd)\b/gi,
+            
+            // Common name patterns (when in specific contexts)
+            names: /\b[A-Z][a-z]+ [A-Z][a-z]+\b/g
+        };
+        
+        function testRedaction(text, shouldRedact = false) {
+            let content = text;
+            let hasRedactions = false;
+            let matchedPatterns = [];
+            
+            // Apply all redaction patterns
+            for (const [patternName, pattern] of Object.entries(patterns)) {
+                const matches = content.match(pattern);
+                if (matches) {
+                    hasRedactions = true;
+                    matchedPatterns.push(patternName);
+                    content = content.replace(pattern, 'REDACTED');
+                }
+            }
+            
+            return {
+                original: text,
+                redacted: content,
+                hasRedactions,
+                matchedPatterns,
+                shouldRedact,
+                isCorrect: hasRedactions === shouldRedact
+            };
+        }
+        
+        const testCases = [
+            // Should NOT be redacted (False Positives)
+            { text: "The @copilot extension helps with coding.", shouldRedact: false },
+            { text: "Ask @copilot to generate code for you.", shouldRedact: false },
+            { text: "GitHub @copilot is an AI assistant.", shouldRedact: false },
+            { text: "I'm using @assistant for help with this task.", shouldRedact: false },
+            { text: "The @support team will help you.", shouldRedact: false },
+            { text: "Contact @admin for permissions.", shouldRedact: false },
+            { text: "Use @everyone for announcements.", shouldRedact: false },
+            { text: "The @here mention in Discord.", shouldRedact: false },
+            { text: "Email prefixes like @domain should not be redacted when not followed by .com", shouldRedact: false },
+            { text: "Twitter handles @username (not GitHub context)", shouldRedact: false },
+            { text: "Generic mentions @user123 without GitHub context", shouldRedact: false },
+            
+            // Should be redacted (True Positives)
+            { text: "Check out my profile at github.com/johndoe123", shouldRedact: true },
+            { text: "Visit github.com/microsoft/vscode for the source code.", shouldRedact: true },
+            { text: "Follow @octocat on GitHub for updates.", shouldRedact: true },
+            { text: "GitHub user @defunkt created GitHub.", shouldRedact: true },
+            { text: "The GitHub user @developer123 contributed", shouldRedact: true },
+            { text: "Follow @jane_coder on GitHub", shouldRedact: true },
+            { text: "Check @torvalds on GitHub for Linux updates.", shouldRedact: true },
+            
+            // Edge cases - emails should still work
+            { text: "Email addresses should still work: john@example.com", shouldRedact: true },
+        ];
+        
+        function runTests() {
+            const resultsDiv = document.getElementById('results');
+            let passCount = 0;
+            let totalTests = testCases.length;
+            
+            testCases.forEach((testCase, index) => {
+                const result = testRedaction(testCase.text, testCase.shouldRedact);
+                
+                const testDiv = document.createElement('div');
+                testDiv.className = `test-case ${testCase.shouldRedact ? 'should-redact' : 'should-not-redact'}`;
+                
+                const isPass = result.isCorrect;
+                if (isPass) passCount++;
+                
+                testDiv.innerHTML = `
+                    <div><strong>Test ${index + 1}:</strong> ${testCase.shouldRedact ? 'Should redact' : 'Should NOT redact'}</div>
+                    <div><strong>Original:</strong> ${result.original}</div>
+                    <div><strong>Result:</strong> ${result.redacted}</div>
+                    <div><strong>Matched patterns:</strong> ${result.matchedPatterns.join(', ') || 'None'}</div>
+                    <div class="test-result ${isPass ? 'pass' : 'fail'}">
+                        ${isPass ? '✅ PASS' : '❌ FAIL'} - ${result.hasRedactions ? 'Redacted' : 'Not redacted'}
+                    </div>
+                `;
+                
+                resultsDiv.appendChild(testDiv);
+            });
+            
+            // Add summary
+            const summaryDiv = document.createElement('div');
+            summaryDiv.className = 'test-section';
+            summaryDiv.innerHTML = `
+                <h2>Test Summary</h2>
+                <div class="test-result ${passCount === totalTests ? 'pass' : 'fail'}">
+                    ${passCount}/${totalTests} tests passed (${Math.round(passCount/totalTests*100)}%)
+                </div>
+            `;
+            resultsDiv.insertBefore(summaryDiv, resultsDiv.firstChild);
+        }
+        
+        // Run tests when page loads
+        runTests();
+    </script>
+</body>
+</html>
