@@ -519,7 +519,7 @@ document.addEventListener('DOMContentLoaded', () => {
       toast.classList.remove('show');
       setTimeout(() => {
         if (toast.parentNode) {
-          toast.parentNode.removeChild(toast);
+          toast.remove();
         }
       }, 300);
     }, 4000);
