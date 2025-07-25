@@ -5,13 +5,11 @@ chrome.runtime.onInstalled.addListener(() => {
   chrome.storage.sync.get(['siteList', 'siteListMode', 'ignoreList', 'filterList', 'protectionMode'], (result) => {
     // If new format already exists, don't migrate
     if (result.ignoreList !== undefined || result.filterList !== undefined || result.protectionMode !== undefined) {
-      console.log('Redactor: New storage format already exists, skipping migration');
       return;
     }
     
     // If old format exists, migrate it
     if (result.siteList !== undefined && result.siteListMode !== undefined) {
-      console.log('Redactor: Migrating from old storage format');
       
       const newData = {
         ignoreList: [],
@@ -31,13 +29,11 @@ chrome.runtime.onInstalled.addListener(() => {
       
       // Save migrated data
       chrome.storage.sync.set(newData, () => {
-        console.log('Redactor: Migration completed successfully');
         // Clean up old format (optional - could be kept for rollback)
         // chrome.storage.sync.remove(['siteList', 'siteListMode']);
       });
     } else {
       // No existing data, set defaults for new installation
-      console.log('Redactor: Setting up default storage for new installation');
       chrome.storage.sync.set({
         nodoxxingEnabled: true,
         contrastModeEnabled: true,

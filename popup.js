@@ -97,13 +97,10 @@ document.addEventListener('DOMContentLoaded', () => {
   
   newSiteInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
-      // Prompt user to select the list when pressing Enter
-      const userChoice = window.confirm("Press OK to add to 'ignore' list or Cancel to add to 'filter' list.");
-      if (userChoice) {
-        addSiteManually('ignore');
-      } else {
-        addSiteManually('filter');
-      }
+      // Default to adding to filter list when pressing Enter
+      // This is the safer option as it allows protection
+      addSiteManually('filter');
+      showToast('Site added to filter list. Use the buttons above to choose the specific list.', 'info');
     }
   });
 
@@ -169,7 +166,7 @@ document.addEventListener('DOMContentLoaded', () => {
       
       // Check if string already exists
       if (userStrings.includes(newString)) {
-        alert('This string is already in the list.');
+        showToast('This string is already in the list.', 'warning');
         return;
       }
       
@@ -326,7 +323,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     } catch (error) {
       // If URL parsing fails, notify the user and use the input as-is
-      alert('Failed to parse the URL. Using the input as-is. Please ensure it is a valid domain.');
+      showToast('Failed to parse the URL. Using the input as-is. Please ensure it is a valid domain.', 'warning');
       domain = siteUrl;
     }
     
@@ -496,9 +493,35 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
   
-  // Simple notification function
+  // Simple notification function - replaced alert with toast system
   function showNotification(message, type = 'info') {
-    // For now, just use alert - could be enhanced with toast notifications
-    alert(message);
+    showToast(message, type);
+  }
+  
+  // Toast notification system to replace intrusive alert() dialogs
+  function showToast(message, type = 'info') {
+    const toastContainer = document.getElementById('toastContainer');
+    if (!toastContainer) return;
+    
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.textContent = message;
+    
+    toastContainer.appendChild(toast);
+    
+    // Trigger animation
+    setTimeout(() => {
+      toast.classList.add('show');
+    }, 10);
+    
+    // Auto-remove after 4 seconds
+    setTimeout(() => {
+      toast.classList.remove('show');
+      setTimeout(() => {
+        if (toast.parentNode) {
+          toast.remove();
+        }
+      }, 300);
+    }, 4000);
   }
 });
